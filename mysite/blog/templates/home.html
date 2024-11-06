@@ -1,0 +1,42 @@
+<!-- home.html -->
+{% load static %}
+
+<!DOCTYPE html>
+	<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Pong Online</title>
+		<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+	</head>
+
+	<body>
+		<div class="menu-container">
+			<h1>Pong Online</h1>
+			<button onclick="selectMode('vsPlayer')">VS Player</button>
+			<button onclick="selectMode('tournament')">Tournament</button>
+		</div>
+
+		<div class="nickname-container" id="nicknameContainer">
+			<h2>Enter Player Nicknames</h2>
+			<input type="text" id="player1Nickname" placeholder="Player 1 Nickname">
+			<input type="text" id="player2Nickname" placeholder="Player 2 Nickname">
+			<button onclick="startVsPlayerGame()">Start Game</button>
+		</div>
+
+		<div id="gameContent">
+			<div id="score"></div>
+			<canvas id="gameCanvas" width="600" height="400"></canvas>
+		</div>
+
+		<div class="button-container">
+			<button onclick="resetGame()">Reset Game</button>
+			<button onclick="returnToMenu()">Return to Menu</button>
+		</div>
+
+		 <!-- Link JavaScript file -->
+		 <script src="{% static 'js/menu.js' %}"></script>
+		 <script src="{% static 'js/tournment.js' %}"></script>
+		 <script src="{% static 'js/vsplayer.js' %}"></script>
+	</body>
