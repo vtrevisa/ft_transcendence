@@ -7,36 +7,65 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Pong Online</title>
+		<title>Pongon-line</title>
 		<link rel="stylesheet" href="{% static 'css/styles.css' %}">
 	</head>
 
 	<body>
 		<div class="menu-container">
-			<h1>Pong Online</h1>
+			<h1>Pongon-line</h1>
 			<button onclick="selectMode('vsPlayer')">VS Player</button>
 			<button onclick="selectMode('tournament')">Tournament</button>
 		</div>
-
 		<div class="nickname-container" id="nicknameContainer">
 			<h2>Enter Player Nicknames</h2>
 			<input type="text" id="player1Nickname" placeholder="Player 1 Nickname">
 			<input type="text" id="player2Nickname" placeholder="Player 2 Nickname">
 			<button onclick="startVsPlayerGame()">Start Game</button>
 		</div>
-
 		<div id="gameContent">
 			<div id="score"></div>
 			<canvas id="gameCanvas" width="600" height="400"></canvas>
 		</div>
-
 		<div class="button-container">
 			<button onclick="resetGame()">Reset Game</button>
 			<button onclick="returnToMenu()">Return to Menu</button>
 		</div>
+		<div class="tButton-container">
+			<button onclick="nextMatch()">Next Match</button>
+			<button onclick="endTournament()">End Tournament</button>
+		</div>
+		<div class="tournament-container" id="tournamentContainer" style="display: none;">
+			<h2>Enter Tournament Player Nicknames</h2>
+			<input type="text" id="player1" placeholder="Player 1 Nickname">
+			<input type="text" id="player2" placeholder="Player 2 Nickname">
+			<input type="text" id="player3" placeholder="Player 3 Nickname">
+			<input type="text" id="player4" placeholder="Player 4 Nickname">
+			<input type="text" id="player5" placeholder="Player 5 Nickname">
+			<input type="text" id="player6" placeholder="Player 6 Nickname">
+			<input type="text" id="player7" placeholder="Player 7 Nickname">
+			<input type="text" id="player8" placeholder="Player 8 Nickname">
+			<button onclick="startTournament()">Start Tournament</button>
+		</div>
+		<div id="tournamentBracket" style="display: none;">
+			<h2>Tournament Bracket</h2>
+			<div id="quarterfinals">
+				<h3>Quarterfinals</h3>
+				<!-- Quarterfinals pairings will be displayed here -->
+			</div>
+			<div id="semifinals" style="display: none;">
+				<h3>Semifinals</h3>
+				<!-- Semifinals pairings will be displayed here -->
+			</div>
+			<div id="final" style="display: none;">
+				<h3>Final</h3>
+				<!-- Final pairing will be displayed here -->
+			</div>
+		</div>
 
 		 <!-- Link JavaScript file -->
+		 <script src="{% static 'js/tournament.js' %}"></script>
 		 <script src="{% static 'js/menu.js' %}"></script>
-		 <script src="{% static 'js/tournment.js' %}"></script>
 		 <script src="{% static 'js/vsplayer.js' %}"></script>
+		 
 	</body>

@@ -7,20 +7,31 @@ let player1Nickname = "Player 1";
 let player2Nickname = "Player 2";
 let gameStarted = false;
 let ball, player1, player2, gameInterval;
+let isTournamentMode = false; // Flag to check if in tournament mode
 
 const paddleSpeed = 12;
 let player1Y = canvas.height / 2 - 30;
 let player2Y = canvas.height / 2 - 30;
 const maxScore = 5;
 
-function startVsPlayerGame()
+function startVsPlayerGame(tournamentMode = false)
 {
+	isTournamentMode = tournamentMode;
+	console.log(`isTournamentMode startVsPlayerGame: ${isTournamentMode}`);
 	player1Nickname = document.getElementById('player1Nickname').value || "Player 1";
 	player2Nickname = document.getElementById('player2Nickname').value || "Player 2";
-	document.querySelector('.button-container').style.display = 'block';
+
 	nicknameContainer.style.display = 'none';
 	gameContent.style.display = 'block';
 	scoreDisplay.style.display = 'block';  // Make sure score is visible at the start
+
+	if (isTournamentMode) {
+        document.querySelector('.button-container').style.display = 'none';
+        document.querySelector('.tButton-container').style.display = 'none';
+    } else {
+        document.querySelector('.button-container').style.display = 'block';
+        document.querySelector('.tButton-container').style.display = 'none';
+    }
 
 	resetGame();
 	draw();
@@ -51,31 +62,33 @@ function startGame()
 	resetGame();
 	draw();
 	if (gameInterval) clearInterval(gameInterval);
-	gameInterval = setInterval(updateGame, 1000 / 60); // 60 fps
+	gameInterval = setInterval(() => updateGame(), 1000 / 60); // 60 fps
 }
 
-function updateGame()
-{
-	moveBall();
-	detectCollision();
-	draw();
+function updateGame() {
+    moveBall();
+    detectCollision();
+    draw();
 
-	if (player1Score >= maxScore || player2Score >= maxScore)
-	{
-		const winner = player1Score >= maxScore ? player1Nickname : player2Nickname;
-		scoreDisplay.textContent = `${winner} wins! Final Score: ${player1Nickname} ${player1Score} - ${player2Nickname} ${player2Score}`;
+    if (player1Score >= maxScore || player2Score >= maxScore) {
+        const winner = player1Score >= maxScore ? player1Nickname : player2Nickname;
+        scoreDisplay.textContent = `${winner} wins! Final Score: ${player1Nickname} ${player1Score} - ${player2Nickname} ${player2Score}`;
 
-		clearInterval(gameInterval);
-		gameInterval = null; // Clear the interval reference
+        clearInterval(gameInterval);
+        gameInterval = null; // Clear the interval reference
 
-	return;
-	}
-	updateScore(); // Update score display if game is still ongoing
+        if (isTournamentMode) {
+            document.querySelector('.button-container').style.display = 'none';
+			document.querySelector('.tButton-container').style.display = 'block';
+        }
+        return;
+    }
+    updateScore(); // Update score display if game is still ongoing
 }
 
 function resetBall()
 {
-	ball = { x: canvas.width / 2, y: canvas.height / 2, vx: 2, vy: 2, radius: 8 };
+	ball = { x: canvas.width / 2, y: canvas.height / 2, vx: 10, vy: 10, radius: 8 };
 	player1 = { x: 10, y: player1Y, width: 10, height: 60 };
 	player2 = { x: canvas.width - 20, y: player2Y, width: 10, height: 60 };
 }
@@ -161,6 +174,6 @@ document.addEventListener('keydown', (event) => {
 document.addEventListener('keydown', (event) => {
 	if (event.code === 'Space' && !gameStarted) {
 		gameStarted = true; // Set game as started
-		startGame(); // Start the game loop
+		startGame(); // Start the game loop with tournament mode
 	}
 	});
