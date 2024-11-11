@@ -17,7 +17,6 @@ const maxScore = 5;
 function startVsPlayerGame(tournamentMode = false)
 {
 	isTournamentMode = tournamentMode;
-	console.log(`isTournamentMode startVsPlayerGame: ${isTournamentMode}`);
 	player1Nickname = document.getElementById('player1Nickname').value || "Player 1";
 	player2Nickname = document.getElementById('player2Nickname').value || "Player 2";
 
@@ -26,12 +25,12 @@ function startVsPlayerGame(tournamentMode = false)
 	scoreDisplay.style.display = 'block';  // Make sure score is visible at the start
 
 	if (isTournamentMode) {
-        document.querySelector('.button-container').style.display = 'none';
-        document.querySelector('.tButton-container').style.display = 'none';
-    } else {
-        document.querySelector('.button-container').style.display = 'block';
-        document.querySelector('.tButton-container').style.display = 'none';
-    }
+		document.querySelector('.button-container').style.display = 'none';
+		document.querySelector('.tButton-container').style.display = 'none';
+	} else {
+		document.querySelector('.button-container').style.display = 'block';
+		document.querySelector('.tButton-container').style.display = 'none';
+	}
 
 	resetGame();
 	draw();
@@ -66,24 +65,25 @@ function startGame()
 }
 
 function updateGame() {
-    moveBall();
-    detectCollision();
-    draw();
+	moveBall();
+	detectCollision();
+	draw();
 
-    if (player1Score >= maxScore || player2Score >= maxScore) {
-        const winner = player1Score >= maxScore ? player1Nickname : player2Nickname;
-        scoreDisplay.textContent = `${winner} wins! Final Score: ${player1Nickname} ${player1Score} - ${player2Nickname} ${player2Score}`;
+	if (player1Score >= maxScore || player2Score >= maxScore) {
+		const winner = player1Score >= maxScore ? player1Nickname : player2Nickname;
+		scoreDisplay.textContent = `${winner} wins! Final Score: ${player1Nickname} ${player1Score} - ${player2Nickname} ${player2Score}`;
 
-        clearInterval(gameInterval);
-        gameInterval = null; // Clear the interval reference
+		clearInterval(gameInterval);
+		gameInterval = null; // Clear the interval reference
 
-        if (isTournamentMode) {
-            document.querySelector('.button-container').style.display = 'none';
+		if (isTournamentMode) {
+			document.querySelector('.button-container').style.display = 'none';
 			document.querySelector('.tButton-container').style.display = 'block';
-        }
-        return;
-    }
-    updateScore(); // Update score display if game is still ongoing
+			handleMatchWinner(winner);
+		}
+		return;
+	}
+	updateScore(); // Update score display if game is still ongoing
 }
 
 function resetBall()
