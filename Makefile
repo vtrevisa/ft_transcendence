@@ -18,4 +18,4 @@ $(SNAME):
 	django-admin startproject $(SNAME)
 
 run:
-	python ./mysite/manage.py runserver
+	python3 ./mysite/manage.py runserver
