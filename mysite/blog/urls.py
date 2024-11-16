@@ -1,8 +1,9 @@
-# blog/urls.py
-
 from django.urls import path
-from .views import home
+from . import views
+from django.contrib import admin
 
 urlpatterns = [
-    path('', home, name='home'),  # Define a URL base do blog
+    path('', views.home, name='home'),
+    path('signIn/', views.sign_in_view, name='sign_in'),
+    path('login/', views.login_view, name='login'),
 ]

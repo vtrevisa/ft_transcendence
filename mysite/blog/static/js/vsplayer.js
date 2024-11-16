@@ -157,17 +157,19 @@ function draw()
 }
 
 document.addEventListener('keydown', (event) => {
-	if (event.key === 'w' && player1Y > 0) {
-		player1Y -= paddleSpeed; // Move player 1 up
-	}
-	if (event.key === 's' && player1Y < canvas.height - player1.height) {
-		player1Y += paddleSpeed; // Move player 1 down
-	}
-	if (event.key === 'ArrowUp' && player2Y > 0) {
-		player2Y -= paddleSpeed; // Move player 2 up
-	}
-	if (event.key === 'ArrowDown' && player2Y < canvas.height - player2.height) {
-		player2Y += paddleSpeed; // Move player 2 down
+	if (gameStarted) {
+		if (event.key === 'w' && player1Y > 0) {
+			player1Y -= paddleSpeed; // Move player 1 up
+		}
+		if (event.key === 's' && player1Y < canvas.height - player1.height) {
+			player1Y += paddleSpeed; // Move player 1 down
+		}
+		if (event.key === 'ArrowUp' && player2Y > 0) {
+			player2Y -= paddleSpeed; // Move player 2 up
+		}
+		if (event.key === 'ArrowDown' && player2Y < canvas.height - player2.height) {
+			player2Y += paddleSpeed; // Move player 2 down
+		}
 	}
 });
 
@@ -176,4 +178,25 @@ document.addEventListener('keydown', (event) => {
 		gameStarted = true; // Set game as started
 		startGame(); // Start the game loop with tournament mode
 	}
+	});
+
+	document.addEventListener('DOMContentLoaded', function() {
+		const canvas = document.getElementById('gameCanvas');
+		if (canvas) {
+			console.log('Canvas element found:', canvas);
+			const context = canvas.getContext('2d');
+			const height = canvas.height; // Ensure canvas is defined
+			const width = canvas.width; // Ensure canvas is defined
+	
+			console.log('Canvas height:', height);
+			console.log('Canvas width:', width);
+	
+			// Example of drawing something on the canvas
+			context.fillStyle = 'black';
+			context.fillRect(0, 0, width, height);
+	
+			// Other game-related code...
+		} else {
+			console.error('Canvas element not found');
+		}
 	});

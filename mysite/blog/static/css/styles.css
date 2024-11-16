@@ -1,63 +1,84 @@
 body {
-	font-family: Arial, sans-serif;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	height: 100vh;
-	margin: 0;
-	background-color: #222;
-	color: #fff;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #222;
+    color: #fff;
 }
+
 #gameCanvas {
-	border: 2px solid #fff;
-	background-color: #000;
+    border: 2px solid #fff;
+    background-color: #000;
 }
+
 #score {
-	font-size: 24px;
-	margin: 20px 0;
+    font-size: 24px;
+    margin: 20px 0;
 }
+
 .nickname-container {
-	margin-top: 15px;
-	display: none;
+    margin-top: 15px;
+    display: none;
 }
+
 .button-container {
-	margin-top: 15px;
-	display: none;
+    margin-top: 15px;
+    display: none;
 }
 
 .tButton-container {
-	margin-top: 15px;
-	display: none;
+    margin-top: 15px;
+    display: none;
+}
+
+.game-container {
+    display: none;
+    flex-direction: column;
+    align-items: center;
 }
 
 .menu-container {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
+
+.auth-container {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
 button {
-	background-color: #28a745;
-	color: #fff;
-	border: none;
-	padding: 10px 20px;
-	cursor: pointer;
-	font-size: 18px;
-	border-radius: 5px;
-	margin: 5px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 18px;
+    border-radius: 5px;
+    margin: 5px;
 }
+
 button:hover {
-	background-color: #218838;
+    background-color: #218838;
 }
+
 input {
-	padding: 10px;
-	font-size: 18px;
-	border-radius: 5px;
-	border: 1px solid #333;
-	margin: 5px;
+    padding: 10px;
+    font-size: 18px;
+    border-radius: 5px;
+    border: 1px solid #333;
+    margin: 5px;
 }
+
 #gameContent {
-	display: none; /* Hide game content initially */
+    display: none; /* Hide game content initially */
 }
 
 .tournament-container, #tournamentBracket {
