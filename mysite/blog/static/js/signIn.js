@@ -19,6 +19,17 @@ function showSignIn() {
     document.getElementById('signInContainer').style.display = 'block';
 }
 
+function showLogin() {
+    document.getElementById('authContainer').style.display = 'none';
+    document.getElementById('loginContainer').style.display = 'block';
+}
+
+function returnToMenu() {
+    document.getElementById('signInContainer').style.display = 'none';
+    document.getElementById('loginContainer').style.display = 'none';
+    document.getElementById('menuContainer').style.display = 'block';
+}
+
 function displayProfile(profile) {
     document.getElementById('profileUsername').textContent = profile.username;
     document.getElementById('profileEmail').textContent = profile.email;
