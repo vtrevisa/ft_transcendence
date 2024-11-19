@@ -8,28 +8,30 @@ const tournamentContainer = document.getElementById('tournamentContainer');
 const tournamentBracket = document.getElementById('tournamentBracket');
 const authenticationContainer = document.getElementById('authContainer');
 
-function selectMenu(mode)
-{
-	if (mode === 'game') {
-		menuContainer.style.display = 'none';
-		gameContainer.style.display = 'flex';
-	} else if (mode === 'account'){
-		authenticationContainer.style.display = 'block';
-		menuContainer.style.display = 'none';
-	}
+// menu.js
+function selectMenu(mode) {
+    if (mode === 'game') {
+        menuContainer.style.display = 'none';
+        gameContainer.style.display = 'flex';
+    } else if (mode === 'account') {
+        authenticationContainer.style.display = 'block';
+        menuContainer.style.display = 'none';
+    } else if (mode === 'guest') {
+        menuContainer.style.display = 'none';
+        gameContainer.style.display = 'flex';
+    }
 }
 
-function selectMode(mode)
-{
-	console.log('selectMode called with mode:', mode); // Debugging log
-	if (mode === 'vsPlayer') {
-		gameContainer.style.display = 'none';
-		nicknameContainer.style.display = 'block';
-	} else if (mode === 'tournament') {
-		gameContainer.style.display = 'none';
-		tournamentContainer.style.display = 'block';
-		tournamentBracket.style.display = 'none'; // Ensure the bracket is hidden initially
-	}
+function selectMode(mode) {
+    console.log('selectMode called with mode:', mode); // Debugging log
+    if (mode === 'vsPlayer') {
+        gameContainer.style.display = 'none';
+        nicknameContainer.style.display = 'block';
+    } else if (mode === 'tournament') {
+        gameContainer.style.display = 'none';
+        tournamentContainer.style.display = 'block';
+        tournamentBracket.style.display = 'none'; // Ensure the bracket is hidden initially
+    }
 }
 
 function returnToMenu() {
@@ -40,8 +42,7 @@ function returnToMenu() {
     document.querySelector('.tButton-container').style.display = 'none';
     nicknameContainer.style.display = 'none';
     gameContainer.style.display = 'none';
-
     // Show the main menu again with initial style
-	menuContainer.style.display = 'flex';
+    menuContainer.style.display = 'flex';
     resetGame();
 }

@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout as auth_logout
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
@@ -50,3 +50,10 @@ def login_view(request):
         else:
             return JsonResponse({'success': False, 'message': 'Invalid credentials'})
     return render(request, 'login.html')
+
+@csrf_exempt
+def logout_view(request):
+    if request.method == 'POST':
+        auth_logout(request)
+        return JsonResponse({'success': True})
+    return JsonResponse({'error': 'Invalid request method'}, status=400)

@@ -27,84 +27,70 @@ function showLogin() {
 function returnToMenu() {
     document.getElementById('signInContainer').style.display = 'none';
     document.getElementById('loginContainer').style.display = 'none';
+    document.getElementById('editProfileForm').style.display = 'none';
     document.getElementById('menuContainer').style.display = 'block';
 }
 
-function displayProfile(profile) {
-    document.getElementById('profileUsername').textContent = profile.username;
-    document.getElementById('profileEmail').textContent = profile.email;
-    document.getElementById('profileNickname').textContent = profile.nickname;
-    document.getElementById('profileAvatar').src = profile.avatar_url;
-    document.getElementById('profileJoinedDate').textContent = profile.joined_date;
-    document.getElementById('profileLastLogin').textContent = profile.last_login;
-    document.getElementById('profileContainer').style.display = 'block';
-}
-
-document.getElementById('signInForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const formData = new FormData(this);
-
-    const csrfToken = getCookie('csrftoken');
-    console.log('CSRF Token:', csrfToken);
-
-    fetch('/signIn/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': csrfToken
-        },
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(errorData => {
-                throw new Error(errorData.detail || 'Network response was not ok');
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Sign in successful:', data);
-        // Optionally, you can redirect to the login page or automatically log in the user
-        // window.location.href = '/login/';
-    })
-    .catch(error => {
-        console.error('There was a problem with the fetch operation:', error);
-        alert('Error during sign in: ' + error.message);
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('signInForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const csrfToken = getCookie('csrftoken');
+        fetch('/signIn/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errorData => {
+                    throw new Error(errorData.detail);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                displayProfile(data);
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
     });
-});
 
-document.getElementById('loginForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const formData = new FormData(this);
-
-    const csrfToken = getCookie('csrftoken');
-    console.log('CSRF Token:', csrfToken);
-
-    fetch('/login/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': csrfToken
-        },
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(errorData => {
-                throw new Error(errorData.message || 'Network response was not ok');
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            console.log('Login successful:', data);
-            displayProfile(data);
-        } else {
-            alert('Login failed: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('There was a problem with the fetch operation:', error);
-        alert('Error during login: ' + error.message);
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const csrfToken = getCookie('csrftoken');
+        fetch('/login/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errorData => {
+                    throw new Error(errorData.message);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                displayProfile(data);
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
     });
 });
