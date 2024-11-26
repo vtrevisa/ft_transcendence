@@ -1,48 +1,71 @@
+// menu.js
+
 // Get elements from the DOM
-const menuContainer = document.querySelector('.menu-container');
-const gameContainer = document.querySelector('.game-container');
+const menuContainer = document.getElementById('menuContainer');
+const gameContainer = document.getElementById('gameContainer');
 const nicknameContainer = document.getElementById('nicknameContainer');
 const gameContent = document.getElementById('gameContent');
 const scoreDisplay = document.getElementById('score');
 const tournamentContainer = document.getElementById('tournamentContainer');
 const tournamentBracket = document.getElementById('tournamentBracket');
-const authenticationContainer = document.getElementById('authContainer');
+const loginContainer = document.getElementById('loginContainer');
+const signInContainer = document.getElementById('signInContainer');
+const guestMenuContainer = document.getElementById('guestMenuContainer');
+const gameModeContainer = document.getElementById('gameModeContainer');
 
-// menu.js
-function selectMenu(mode) {
-    if (mode === 'game') {
-        menuContainer.style.display = 'none';
-        gameContainer.style.display = 'flex';
-    } else if (mode === 'account') {
-        authenticationContainer.style.display = 'block';
-        menuContainer.style.display = 'none';
-    } else if (mode === 'guest') {
-        menuContainer.style.display = 'none';
-        gameContainer.style.display = 'flex';
-    }
+// Function to show the login form
+function showLogin() {
+    hideAllContainers();
+    loginContainer.style.display = 'block';
 }
 
-function selectMode(mode) {
-    console.log('selectMode called with mode:', mode); // Debugging log
-    if (mode === 'vsPlayer') {
-        gameContainer.style.display = 'none';
-        nicknameContainer.style.display = 'block';
-    } else if (mode === 'tournament') {
-        gameContainer.style.display = 'none';
-        tournamentContainer.style.display = 'block';
-        tournamentBracket.style.display = 'none'; // Ensure the bracket is hidden initially
-    }
+// Function to show the sign-in form
+function showSignIn() {
+    hideAllContainers();
+    signInContainer.style.display = 'block';
 }
 
+// Function to show the guest menu
+function playAsGuest() {
+    hideAllContainers();
+    guestMenuContainer.style.display = 'block';
+}
+
+// Function to return to the main menu
 function returnToMenu() {
-    // Hide game-specific elements
-    document.getElementById('score').style.display = 'none';
-    gameContent.style.display = 'none';
-    document.querySelector('.button-container').style.display = 'none';
-    document.querySelector('.tButton-container').style.display = 'none';
-    nicknameContainer.style.display = 'none';
-    gameContainer.style.display = 'none';
-    // Show the main menu again with initial style
+    hideAllContainers();
     menuContainer.style.display = 'flex';
     resetGame();
 }
+
+// Function to hide all containers
+function hideAllContainers() {
+    const containers = document.querySelectorAll('.container');
+    containers.forEach(container => container.style.display = 'none');
+    document.querySelector('.button-container').style.display = 'none';
+    document.querySelector('.tButton-container').style.display = 'none';
+}
+
+// Function to select game mode
+function selectMode(mode) {
+    hideAllContainers();
+    if (mode === 'vsPlayer') {
+        nicknameContainer.style.display = 'block';
+    } else if (mode === 'tournament') {
+        tournamentContainer.style.display = 'block';
+    }
+}
+
+// Event listener for DOM content loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listeners for menu buttons
+    document.getElementById('loginButton').addEventListener('click', showLogin);
+    document.getElementById('signInButton').addEventListener('click', showSignIn);
+    document.getElementById('playAsGuestButton').addEventListener('click', playAsGuest);
+    document.getElementById('vsGameButton').addEventListener('click', function() {
+        selectMode('vsPlayer');
+    });
+    document.getElementById('tournamentButton').addEventListener('click', function() {
+        selectMode('tournament');
+    });
+});

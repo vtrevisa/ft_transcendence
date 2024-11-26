@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 SNAME=mysite
 
 all: update install python $(SNAME) run
@@ -18,4 +19,5 @@ $(SNAME):
 	django-admin startproject $(SNAME)
 
 run:
+	source tenv/bin/activate
 	python3 ./mysite/manage.py runserver
