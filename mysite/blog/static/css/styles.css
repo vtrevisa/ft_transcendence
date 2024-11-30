@@ -25,20 +25,26 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     background-color: #333;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    margin: 0; /* Ensure no extra margin */
 }
 
 .menu-container {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    background-color: #333;
+    padding: 10px; /* Adjust padding to remove extra space */
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    width: auto;
+    max-width: 400px;
+    box-sizing: border-box;
+    margin: 0; /* Ensure no extra margin */
 }
 
 form {
@@ -58,7 +64,9 @@ input[type="text"], input[type="password"], input[type="email"], input[type="fil
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    width: 200px;
+    width: 100%;
+    max-width: 300px;
+    box-sizing: border-box;
 }
 
 button {
@@ -69,6 +77,9 @@ button {
     border-radius: 4px;
     cursor: pointer;
     margin-top: 10px;
+    width: 100%;
+    max-width: 200px;
+    box-sizing: border-box;
 }
 
 button:hover {

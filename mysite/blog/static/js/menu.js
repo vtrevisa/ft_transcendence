@@ -12,6 +12,8 @@ const loginContainer = document.getElementById('loginContainer');
 const signInContainer = document.getElementById('signInContainer');
 const guestMenuContainer = document.getElementById('guestMenuContainer');
 const gameModeContainer = document.getElementById('gameModeContainer');
+const updateProfileContainer = document.getElementById('updateProfileContainer');
+const profileContainer = document.getElementById('profileContainer');
 
 // Function to show the login form
 function showLogin() {
@@ -25,25 +27,41 @@ function showSignIn() {
     signInContainer.style.display = 'block';
 }
 
-// Function to show the guest menu
+// Function to handle "Play as Guest" button click
 function playAsGuest() {
     hideAllContainers();
-    guestMenuContainer.style.display = 'block';
+    gameModeContainer.style.display = 'block';
 }
+
+// menu.js
 
 // Function to return to the main menu
 function returnToMenu() {
     hideAllContainers();
-    menuContainer.style.display = 'flex';
-    resetGame();
+    checkLoginStatus().then(isLoggedIn => {
+        if (isLoggedIn) {
+            profileContainer.style.display = 'flex';
+        } else {
+            menuContainer.style.display = 'block';
+        }
+    });
 }
 
 // Function to hide all containers
 function hideAllContainers() {
-    const containers = document.querySelectorAll('.container');
-    containers.forEach(container => container.style.display = 'none');
-    document.querySelector('.button-container').style.display = 'none';
-    document.querySelector('.tButton-container').style.display = 'none';
+    if (menuContainer) menuContainer.style.display = 'none';
+    if (gameContainer) gameContainer.style.display = 'none';
+    if (nicknameContainer) nicknameContainer.style.display = 'none';
+    if (gameContent) gameContent.style.display = 'none';
+    if (scoreDisplay) scoreDisplay.style.display = 'none';
+    if (tournamentContainer) tournamentContainer.style.display = 'none';
+    if (tournamentBracket) tournamentBracket.style.display = 'none';
+    if (loginContainer) loginContainer.style.display = 'none';
+    if (signInContainer) signInContainer.style.display = 'none';
+    if (guestMenuContainer) guestMenuContainer.style.display = 'none';
+    if (gameModeContainer) gameModeContainer.style.display = 'none';
+    if (updateProfileContainer) updateProfileContainer.style.display = 'none';
+    if (profileContainer) profileContainer.style.display = 'none';
 }
 
 // Function to select game mode
@@ -68,4 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('tournamentButton').addEventListener('click', function() {
         selectMode('tournament');
     });
+
+    // Ensure the menu container is displayed initially
+    menuContainer.style.display = 'block';
 });

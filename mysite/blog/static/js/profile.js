@@ -18,112 +18,71 @@ function getCookie(name) {
 
 // Function to display the profile
 function displayProfile(profile) {
-    document.getElementById('profileUsername').textContent = profile.username;
-    document.getElementById('profileEmail').textContent = profile.email;
-    document.getElementById('profileNickname').textContent = profile.nickname;
-    document.getElementById('profileAvatar').src = profile.avatar_url;
-    document.getElementById('profileContainer').style.display = 'flex';
-    document.getElementById('logoutButton').style.display = 'block';
-    document.getElementById('vsGameButton').style.display = 'block';
-    document.getElementById('tournamentButton').style.display = 'block';
-    document.getElementById('editProfileButton').style.display = 'block';
+    const profileUsername = document.getElementById('profileUsername');
+    const profileEmail = document.getElementById('profileEmail');
+    const profileNickname = document.getElementById('profileNickname');
+    const profileAvatar = document.getElementById('profileAvatar');
+    const profileContainer = document.getElementById('profileContainer');
+    const logoutButton = document.getElementById('logoutButton');
+    const vsGameButton = document.getElementById('vsGameButton');
+    const tournamentButton = document.getElementById('tournamentButton');
+    const editProfileButton = document.getElementById('editProfileButton');
+    const friendListButton = document.getElementById('friendListButton');
+
+    if (profileUsername) profileUsername.textContent = profile.username;
+    if (profileEmail) profileEmail.textContent = profile.email;
+    if (profileNickname) profileNickname.textContent = profile.nickname;
+    if (profileAvatar) profileAvatar.src = profile.avatar_url;
+    if (profileContainer) profileContainer.style.display = 'flex';
+    if (logoutButton) logoutButton.style.display = 'block';
+    if (vsGameButton) vsGameButton.style.display = 'block';
+    if (tournamentButton) tournamentButton.style.display = 'block';
+    if (editProfileButton) editProfileButton.style.display = 'block';
+    if (friendListButton) friendListButton.style.display = 'block';
+
+    // Add unload event listener to log out the user when the tab is closed
+    window.addEventListener('unload', handleUnload);
 }
 
-// Function to handle logout
-function logout() {
+// Function to handle unload event
+function handleUnload(event) {
     const csrfToken = getCookie('csrftoken');
-    fetch('/logout/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': csrfToken
-        }
-    })
-    .then(response => {
-        if (response.ok) {
-            window.location.reload();
-        } else {
-            alert('Logout failed');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
+    navigator.sendBeacon('/logout/', JSON.stringify({
+        csrfmiddlewaretoken: csrfToken
+    }));
 }
 
 // Function to check if the user is logged in
 function checkLoginStatus() {
-    fetch('/check_login/', {
+    return fetch('/check_login/', {
         method: 'GET',
         headers: {
             'X-CSRFToken': getCookie('csrftoken')
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
-        if (data.logged_in) {
+        if (data && data.logged_in) {
             displayProfile(data);
             document.getElementById('loginContainer').style.display = 'none';
             document.getElementById('loginButton').style.display = 'none';
             document.getElementById('signInButton').style.display = 'none';
             document.getElementById('playAsGuestButton').style.display = 'none';
             document.getElementById('gameModeContainer').style.display = 'block';
+            return true;
         } else {
-            returnToMenu();
+            return false;
         }
     })
     .catch(error => {
         console.error('Error:', error);
+        return false;
     });
-}
-
-// Function to handle login form submission
-function handleLogin(event) {
-    event.preventDefault();
-    const formData = new FormData(document.getElementById('loginForm'));
-    const csrfToken = getCookie('csrftoken');
-    fetch('/login/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': csrfToken
-        },
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            displayProfile(data);
-            document.getElementById('loginContainer').style.display = 'none';
-            document.getElementById('loginButton').style.display = 'none';
-            document.getElementById('signInButton').style.display = 'none';
-            document.getElementById('playAsGuestButton').style.display = 'none';
-            document.getElementById('gameModeContainer').style.display = 'block';
-        } else {
-            alert('Login failed: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-}
-
-// Function to return to the main menu
-function returnToMenu() {
-    hideAllContainers();
-    document.getElementById('menuContainer').style.display = 'block';
-    document.getElementById('loginButton').style.display = 'block';
-    document.getElementById('signInButton').style.display = 'block';
-    document.getElementById('playAsGuestButton').style.display = 'block';
-    document.getElementById('logoutButton').style.display = 'none';
-    document.getElementById('profileContainer').style.display = 'none';
-    document.getElementById('vsGameButton').style.display = 'none';
-    document.getElementById('tournamentButton').style.display = 'none';
-    document.getElementById('gameModeContainer').style.display = 'none';
-}
-
-// Function to hide all containers
-function hideAllContainers() {
-    const containers = document.querySelectorAll('.container');
-    containers.forEach(container => container.style.display = 'none');
 }
 
 // Function to show the profile update form
@@ -172,15 +131,30 @@ function handleProfileUpdate(event) {
     });
 }
 
+// Function to hide all containers
+function hideAllContainers() {
+    const containers = [
+        'menuContainer', 'gameContainer', 'nicknameContainer', 'gameContent',
+        'scoreDisplay', 'tournamentContainer', 'tournamentBracket', 'loginContainer',
+        'signInContainer', 'guestMenuContainer', 'gameModeContainer', 'updateProfileContainer',
+        'profileContainer', 'friendListContainer', 'addFriendContainer'
+    ];
+
+    containers.forEach(containerId => {
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.style.display = 'none';
+        }
+    });
+}
+
 // Event listener for DOM content loaded
 document.addEventListener('DOMContentLoaded', function() {
-    checkLoginStatus();
-
-    // Event listener for login form submission
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', handleLogin);
-    }
+    checkLoginStatus().then(isLoggedIn => {
+        if (!isLoggedIn) {
+            returnToMenu();
+        }
+    });
 
     // Event listener for profile update form submission
     const updateProfileForm = document.getElementById('updateProfileForm');

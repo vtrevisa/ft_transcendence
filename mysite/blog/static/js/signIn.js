@@ -32,22 +32,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: formData
             })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errorData => {
-                        throw new Error(errorData.detail);
-                    });
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    document.getElementById('loginButton').style.display = 'none';
-                    document.getElementById('signInButton').style.display = 'none';
-                    document.getElementById('playAsGuestButton').style.display = 'none';
-                    document.getElementById('logoutButton').style.display = 'block';
-                    document.getElementById('userInfo').style.display = 'flex';
-                    checkLoginStatus(); // Ensure the session is recognized
+                    // Redirect to the menu page
+                    window.location.href = '/';
                 } else {
                     alert(data.message);
                 }
@@ -58,3 +47,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Function to hide all containers
+function hideAllContainers() {
+    const containers = [
+        'menuContainer', 'gameContainer', 'nicknameContainer', 'gameContent',
+        'scoreDisplay', 'tournamentContainer', 'tournamentBracket', 'loginContainer',
+        'signInContainer', 'guestMenuContainer', 'gameModeContainer', 'updateProfileContainer',
+        'profileContainer'
+    ];
+
+    containers.forEach(containerId => {
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.style.display = 'none';
+        }
+    });
+}

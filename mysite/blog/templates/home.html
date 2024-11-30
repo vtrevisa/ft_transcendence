@@ -11,15 +11,16 @@
 <body>
     <header>
         <div class="profile-container" id="profileContainer" style="display: none;">
-            <img id="profileAvatar" src="" alt="User Avatar" class="profile-avatar">
+            <img id="profileAvatar" src="{% static 'images/default_avatar.png' %}" alt="User Avatar" class="profile-avatar">
             <div class="profile-info">
                 <p><strong>Username:</strong> <span id="profileUsername"></span></p>
                 <p><strong>Email:</strong> <span id="profileEmail"></span></p>
                 <p><strong>Nickname:</strong> <span id="profileNickname"></span></p>
                 <button id="editProfileButton" class="edit-profile-button" onclick="showUpdateProfile()">Edit Profile</button>
+                <button id="friendListButton" class="friend-list-button" onclick="showFriendList()">Friend List</button>
             </div>
         </div>
-        <button id="logoutButton" class="logout-button" style="display: none;">Logout</button>
+        <button id="logoutButton" class="logout-button" style="display: none;" onclick="logout()">Logout</button>
     </header>
 
     <!-- Main Menu Container -->
@@ -31,9 +32,10 @@
     </div>
 
     <!-- Game Mode Container -->
-    <div class="game-mode-container" id="gameModeContainer" style="display: none;">
+    <div class="container game-mode-container" id="gameModeContainer" style="display: none;">
         <button id="vsGameButton" onclick="selectMode('vsPlayer')">VS Game</button>
         <button id="tournamentButton" onclick="selectMode('tournament')">Tournament</button>
+        <button onclick="returnToMenu()">Return to Menu</button>
     </div>
 
     <!-- Login Form Container -->
@@ -82,13 +84,36 @@
         <button onclick="returnToMenu()">Return to Menu</button>
     </div>
 
-    <!-- Guest Menu Container -->
-    <div class="container" id="guestMenuContainer" style="display: none;">
-        <h2>Choose Game Mode</h2>
-        <input type="text" id="guestNickname" placeholder="Guest Nickname" required>
-        <button onclick="selectMode('vsPlayer')">VS Game</button>
-        <button onclick="selectMode('tournament')">Tournament</button>
+    <!-- Friend List Container -->
+    <div class="container" id="friendListContainer" style="display: none;">
+        <h2>Friend List</h2>
+        <table id="friendListTable">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Nickname</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Friend list will be populated here -->
+            </tbody>
+        </table>
+        <button onclick="showAddFriendForm()">Add Friend</button>
         <button onclick="returnToMenu()">Return to Menu</button>
+    </div>
+
+    <!-- Add Friend Form Container -->
+    <div class="container" id="addFriendContainer" style="display: none;">
+        <h2>Add Friend</h2>
+        <form id="addFriendForm">
+            {% csrf_token %}
+            <div class="form-row">
+                <input type="text" id="friendUsername" name="username" placeholder="Username" required>
+            </div>
+            <button type="submit">Add Friend</button>
+        </form>
+        <button onclick="showFriendList()">Return to Friend List</button>
     </div>
 
     <!-- Game Container -->
@@ -108,6 +133,7 @@
         <input type="text" id="player1Nickname" placeholder="Player 1 Nickname">
         <input type="text" id="player2Nickname" placeholder="Player 2 Nickname">
         <button onclick="startVsPlayerGame()">Start Game</button>
+        <button onclick="returnToMenu()">Return to Menu</button>
     </div>
 
     <!-- Tournament Button Container -->
@@ -128,6 +154,7 @@
         <input type="text" id="player7" placeholder="Player 7 Nickname">
         <input type="text" id="player8" placeholder="Player 8 Nickname">
         <button onclick="startTournament()">Start Tournament</button>
+        <button onclick="returnToMenu()">Return to Menu</button>
     </div>
 
     <!-- Tournament Bracket Container -->
@@ -145,5 +172,6 @@
     <script src="{% static 'js/signIn.js' %}"></script>
     <script src="{% static 'js/login.js' %}"></script>
     <script src="{% static 'js/profile.js' %}"></script>
+    <script src="{% static 'js/friendlist.js' %}"></script>
 </body>
 </html>
