@@ -40,8 +40,6 @@ function displayProfile(profile) {
     if (editProfileButton) editProfileButton.style.display = 'block';
     if (friendListButton) friendListButton.style.display = 'block';
 
-    // Add unload event listener to log out the user when the tab is closed
-    window.addEventListener('unload', handleUnload);
 }
 
 // Function to handle unload event
