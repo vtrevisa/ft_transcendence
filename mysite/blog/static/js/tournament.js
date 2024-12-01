@@ -1,3 +1,5 @@
+// tournament.js
+
 let currentMatchIndex = 0;
 let matches = [];
 let winners = [];
@@ -8,10 +10,8 @@ function startTournament() {
     currentMatchIndex = 0;
     winners = [];
     tournamentStage = 'quarterfinals';
-
     // Organize quarterfinals matches
     matches = organizeMatches('quarter');
-
     // Display the first match
     displayMatch(currentMatchIndex);
 }
@@ -89,12 +89,11 @@ function nextMatch() {
     document.getElementById('gameContent').style.display = 'none';
     document.querySelector('.tButton-container').style.display = 'none';
     document.querySelector('.button-container').style.display = 'none';
-
     // Move to the next match
     currentMatchIndex++;
     displayMatch(currentMatchIndex);
 }
-
+	
 function endTournament() {
     // Logic to end the tournament
     const tournamentWinner = winners[winners.length - 1];

@@ -97,7 +97,6 @@ def update_profile_view(request):
         return JsonResponse({'success': True})
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
-# views.py
 @login_required
 def get_friends_view(request):
     user_profile = UserProfile.objects.get(user=request.user)

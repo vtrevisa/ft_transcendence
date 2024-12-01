@@ -28,6 +28,8 @@ function displayProfile(profile) {
     const tournamentButton = document.getElementById('tournamentButton');
     const editProfileButton = document.getElementById('editProfileButton');
     const friendListButton = document.getElementById('friendListButton');
+    const player1NicknameInput = document.getElementById('player1Nickname');
+    const tournamentPlayer1Input = document.getElementById('player1');
 
     if (profileUsername) profileUsername.textContent = profile.username;
     if (profileEmail) profileEmail.textContent = profile.email;
@@ -39,15 +41,14 @@ function displayProfile(profile) {
     if (tournamentButton) tournamentButton.style.display = 'block';
     if (editProfileButton) editProfileButton.style.display = 'block';
     if (friendListButton) friendListButton.style.display = 'block';
-
-}
-
-// Function to handle unload event
-function handleUnload(event) {
-    const csrfToken = getCookie('csrftoken');
-    navigator.sendBeacon('/logout/', JSON.stringify({
-        csrfmiddlewaretoken: csrfToken
-    }));
+    if (player1NicknameInput) {
+        player1NicknameInput.value = profile.nickname;
+        player1NicknameInput.readOnly = true;  // Make the field read-only
+    }
+    if (tournamentPlayer1Input) {
+        tournamentPlayer1Input.value = profile.nickname;
+        tournamentPlayer1Input.readOnly = true;  // Make the field read-only
+    }
 }
 
 // Function to check if the user is logged in
@@ -67,18 +68,19 @@ function checkLoginStatus() {
     .then(data => {
         if (data && data.logged_in) {
             displayProfile(data);
-            document.getElementById('loginContainer').style.display = 'none';
-            document.getElementById('loginButton').style.display = 'none';
-            document.getElementById('signInButton').style.display = 'none';
-            document.getElementById('playAsGuestButton').style.display = 'none';
+            document.getElementById('menuContainer').style.display = 'none';
             document.getElementById('gameModeContainer').style.display = 'block';
             return true;
         } else {
+            document.getElementById('menuContainer').style.display = 'block';
+            document.getElementById('gameModeContainer').style.display = 'none';
             return false;
         }
     })
     .catch(error => {
         console.error('Error:', error);
+        document.getElementById('menuContainer').style.display = 'block';
+        document.getElementById('gameModeContainer').style.display = 'none';
         return false;
     });
 }
@@ -96,7 +98,6 @@ function handleProfileUpdate(event) {
     const email = document.getElementById('updateEmail').value;
     const nickname = document.getElementById('updateNickname').value;
     const avatar = document.getElementById('updateAvatar').files[0];
-
     if (email) {
         formData.append('email', email);
     }
@@ -106,7 +107,6 @@ function handleProfileUpdate(event) {
     if (avatar) {
         formData.append('avatar', avatar);
     }
-
     const csrfToken = getCookie('csrftoken');
     fetch('/update_profile/', {
         method: 'POST',
@@ -137,7 +137,6 @@ function hideAllContainers() {
         'signInContainer', 'guestMenuContainer', 'gameModeContainer', 'updateProfileContainer',
         'profileContainer', 'friendListContainer', 'addFriendContainer'
     ];
-
     containers.forEach(containerId => {
         const container = document.getElementById(containerId);
         if (container) {

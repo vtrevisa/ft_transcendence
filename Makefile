@@ -10,6 +10,10 @@ install:
 	sudo apt install python3 python3-pip python3-venv
 	sudo apt install python3-django
 
+migration:
+	python3 ./mysite/manage.py makemigrations
+	python3 ./mysite/manage.py migrate
+
 python:
 	python3 -m venv tenv
 	. tenv/bin/activate
@@ -19,5 +23,4 @@ $(SNAME):
 	django-admin startproject $(SNAME)
 
 run:
-	source tenv/bin/activate
 	python3 ./mysite/manage.py runserver
