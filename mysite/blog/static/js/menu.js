@@ -1,81 +1,91 @@
 // menu.js
 
-// Get elements from the DOM
-const menuContainer = document.getElementById('menuContainer');
-const gameContainer = document.getElementById('gameContainer');
-const nicknameContainer = document.getElementById('nicknameContainer');
-const gameContent = document.getElementById('gameContent');
-const scoreDisplay = document.getElementById('score');
-const tournamentContainer = document.getElementById('tournamentContainer');
-const tournamentBracket = document.getElementById('tournamentBracket');
-const loginContainer = document.getElementById('loginContainer');
-const signInContainer = document.getElementById('signInContainer');
-const guestMenuContainer = document.getElementById('guestMenuContainer');
-const gameModeContainer = document.getElementById('gameModeContainer');
-const updateProfileContainer = document.getElementById('updateProfileContainer');
-const profileContainer = document.getElementById('profileContainer');
-
 // Function to show the login form
 function showLogin() {
+    console.log('showLogin called');
     hideAllContainers();
-    loginContainer.style.display = 'block';
+    document.getElementById('loginContainer').style.display = 'block';
 }
 
 // Function to show the sign-in form
 function showSignIn() {
+    console.log('showSignIn called');
     hideAllContainers();
-    signInContainer.style.display = 'block';
+    document.getElementById('signInContainer').style.display = 'block';
 }
+
+// Function to handle sign-in form submission
+async function handleSignIn(event) {
+    event.preventDefault();
+    const formData = new FormData(document.getElementById('signInForm'));
+    const csrfToken = getCookie('csrftoken');
+    console.log('Form Data:', formData); // Debugging log
+    console.log('CSRF Token:', csrfToken); // Debugging log
+    try {
+        const response = await fetch('/sign_in/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            body: formData
+        });
+        console.log('Response:', response); // Debugging log
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        console.log('Response Data:', data); // Debugging log
+        if (data.success) {
+            // Redirect to the menu page
+            window.location.href = '/';
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
 
 // Function to handle "Play as Guest" button click
 function playAsGuest() {
+    console.log('playAsGuest called');
     hideAllContainers();
-    gameModeContainer.style.display = 'block';
+    document.getElementById('gameModeContainer').style.display = 'block';
 }
-
-// menu.js
 
 // Function to return to the main menu
-function returnToMenu() {
+async function returnToMenu() {
+    console.log('returnToMenu called');
     hideAllContainers();
-    checkLoginStatus().then(isLoggedIn => {
+    try {
+        const isLoggedIn = await checkLoginStatus();
         if (isLoggedIn) {
-            profileContainer.style.display = 'flex';
+            console.log('User is logged in');
+            document.getElementById('profileContainer').style.display = 'flex';
         } else {
-            menuContainer.style.display = 'block';
+            console.log('User is not logged in');
+            document.getElementById('menuContainer').style.display = 'block';
         }
-    });
-}
-
-// Function to hide all containers
-function hideAllContainers() {
-    if (menuContainer) menuContainer.style.display = 'none';
-    if (gameContainer) gameContainer.style.display = 'none';
-    if (nicknameContainer) nicknameContainer.style.display = 'none';
-    if (gameContent) gameContent.style.display = 'none';
-    if (scoreDisplay) scoreDisplay.style.display = 'none';
-    if (tournamentContainer) tournamentContainer.style.display = 'none';
-    if (tournamentBracket) tournamentBracket.style.display = 'none';
-    if (loginContainer) loginContainer.style.display = 'none';
-    if (signInContainer) signInContainer.style.display = 'none';
-    if (guestMenuContainer) guestMenuContainer.style.display = 'none';
-    if (gameModeContainer) gameModeContainer.style.display = 'none';
-    if (updateProfileContainer) updateProfileContainer.style.display = 'none';
-    if (profileContainer) profileContainer.style.display = 'none';
+    } catch (error) {
+        console.error('Error checking login status:', error);
+    }
 }
 
 // Function to select game mode
 function selectMode(mode) {
+    console.log(`selectMode called with mode: ${mode}`);
     hideAllContainers();
     if (mode === 'vsPlayer') {
-        nicknameContainer.style.display = 'block';
+        document.getElementById('nicknameContainer').style.display = 'block';
     } else if (mode === 'tournament') {
-        tournamentContainer.style.display = 'block';
+        document.getElementById('tournamentContainer').style.display = 'block';
     }
 }
 
 // Event listener for DOM content loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM content loaded');
     // Add event listeners for menu buttons
     document.getElementById('loginButton').addEventListener('click', showLogin);
     document.getElementById('signInButton').addEventListener('click', showSignIn);
@@ -87,6 +97,15 @@ document.addEventListener('DOMContentLoaded', function() {
         selectMode('tournament');
     });
 
+    // Add event listener for sign-in form submission
+    const signInForm = document.getElementById('signInForm');
+    if (signInForm) {
+        signInForm.addEventListener('submit', handleSignIn);
+        console.log('Sign-in form event listener added'); // Debugging log
+    } else {
+        console.error('Sign-in form not found'); // Debugging log
+    }
+
     // Ensure the menu container is displayed initially
-    menuContainer.style.display = 'block';
+    document.getElementById('menuContainer').style.display = 'block';
 });

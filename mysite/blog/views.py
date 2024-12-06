@@ -1,30 +1,47 @@
 import json
+import logging
 from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from .models import UserProfile
+from .models import UserProfile, Match
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def sign_in_view(request):
+    logger.debug("sign_in_view called")
     if request.method == 'POST':
+        logger.debug("Request method is POST")
         username = request.POST.get('username')
         password = request.POST.get('password')
         email = request.POST.get('email')
         nickname = request.POST.get('nickname')
         avatar = request.FILES.get('avatar')
-
+        
+        logger.debug(f"Received data - Username: {username}, Password: {password}, Email: {email}, Nickname: {nickname}, Avatar: {avatar}")
+        
         if User.objects.filter(username=username).exists():
+            logger.debug("Username already exists")
             return JsonResponse({'success': False, 'message': 'Username already exists'})
-
+        
         user = User.objects.create_user(username=username, password=password, email=email)
-        user_profile = UserProfile.objects.create(user=user, nickname=nickname, avatar=avatar)
-
+        logger.debug(f"User {username} created successfully")
+        
+        # Check if UserProfile already exists
+        user_profile, created = UserProfile.objects.get_or_create(user=user)
+        user_profile.nickname = nickname
+        user_profile.avatar = avatar
+        user_profile.save()
+        
+        logger.debug(f"UserProfile for {username} created/updated successfully")
+        
         return JsonResponse({'success': True})
+    
+    logger.debug("Invalid request method")
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 @csrf_exempt
@@ -43,12 +60,13 @@ def login_view(request):
                 'username': user.username,
                 'email': user.email,
                 'nickname': user_profile.nickname,
-                'avatar_url': user_profile.avatar.url if user_profile.avatar else '/static/images/default_avatar.png'
+                'avatar_url': user_profile.avatar.url if user_profile.avatar else '/static/default_avatar.png'
             })
         return JsonResponse({'success': False, 'message': 'Invalid credentials'})
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 @csrf_exempt
+@login_required
 def logout_view(request):
     if request.method == 'POST':
         user_profile = UserProfile.objects.get(user=request.user)
@@ -61,15 +79,17 @@ def logout_view(request):
 @login_required
 def check_login_view(request):
     user = request.user
-    user_profile = UserProfile.objects.get(user=user)
-    avatar_url = user_profile.avatar.url if user_profile.avatar else '/static/images/default_avatar.png'
-    return JsonResponse({
-        'logged_in': True,
-        'username': user.username,
-        'email': user.email,
-        'nickname': user_profile.nickname,
-        'avatar_url': avatar_url
-    })
+    try:
+        user_profile = UserProfile.objects.get(user=user)
+        return JsonResponse({
+            'logged_in': True,
+            'username': user.username,
+            'email': user.email,
+            'nickname': user_profile.nickname,
+            'avatar_url': user_profile.avatar.url if user_profile.avatar else '/static/default_avatar.png'
+        })
+    except UserProfile.DoesNotExist:
+        return JsonResponse({'logged_in': False})
 
 @csrf_exempt
 @login_required
@@ -99,28 +119,44 @@ def update_profile_view(request):
 
 @login_required
 def get_friends_view(request):
-    user_profile = UserProfile.objects.get(user=request.user)
-    friends = user_profile.friends.all()
-    friends_list = [{'username': friend.user.username, 'nickname': friend.nickname, 'is_online': friend.is_online} for friend in friends]
-    return JsonResponse({'friends': friends_list})
-
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        friends = user_profile.friends.all()
+        friends_list = [{'username': friend.user.username, 'nickname': friend.nickname, 'is_online': friend.is_online} for friend in friends]
+        return JsonResponse({'friends': friends_list})
+    except UserProfile.DoesNotExist:
+        logger.error("User profile not found for user: %s", request.user.username)
+        return JsonResponse({'success': False, 'message': 'User profile not found'}, status=404)
+    except Exception as e:
+        logger.error("Error fetching friends for user: %s, error: %s", request.user.username, str(e))
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    
 @csrf_exempt
 @login_required
 def add_friend_view(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
         try:
-            friend_user = User.objects.get(username=username)
-            friend_profile = UserProfile.objects.get(user=friend_user)
-        except User.DoesNotExist:
-            return JsonResponse({'success': False, 'message': 'User not found'})
-
-        user_profile = UserProfile.objects.get(user=request.user)
-        if friend_profile in user_profile.friends.all():
-            return JsonResponse({'success': False, 'message': 'User is already a friend'})
-        user_profile.friends.add(friend_profile)
-        return JsonResponse({'success': True})
-    return JsonResponse({'error': 'Invalid request method'}, status=400)
+            data = json.loads(request.body)
+            username = data.get('username')
+            if not username:
+                return JsonResponse({'success': False, 'message': 'Username not provided'}, status=400)
+            try:
+                friend_user = User.objects.get(username=username)
+                friend_profile = UserProfile.objects.get(user=friend_user)
+            except User.DoesNotExist:
+                return JsonResponse({'success': False, 'message': 'User not found'}, status=404)
+            user_profile = UserProfile.objects.get(user=request.user)
+            if friend_profile in user_profile.friends.all():
+                return JsonResponse({'success': False, 'message': 'User is already a friend'}, status=400)
+            user_profile.friends.add(friend_profile)
+            return JsonResponse({'success': True})
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'message': 'Invalid JSON'}, status=400)
+        except UserProfile.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'User profile not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 @csrf_exempt
 @login_required
@@ -128,39 +164,140 @@ def delete_friend_view(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            username = data.get('username')
-            print(f"Received request to remove friend with username: {username}")
+            friend_username = data.get('username')
+            logger.debug(f"Received request to delete friend: {friend_username}")
+
+            friend_user = User.objects.get(username=friend_username)
+            user_profile = UserProfile.objects.get(user=request.user)
+            friend_profile = UserProfile.objects.get(user=friend_user)
+
+            user_profile.friends.remove(friend_profile)
+            logger.debug(f"Friend {friend_username} removed successfully")
+            return JsonResponse({'success': True})
         except json.JSONDecodeError:
-            return JsonResponse({'success': False, 'message': 'Invalid JSON'})
-
-        if not username:
-            return JsonResponse({'success': False, 'message': 'Username not provided'})
-
-        # Get the UserProfile of the currently logged-in user
-        user_profile = UserProfile.objects.get(user=request.user)
-        
-        # Get the list of friends for the current user
-        friends = user_profile.friends.all()
-        print(f"Current user's friends before removal: {[friend.user.username for friend in friends]}")
-        
-        # Try to find the friend to be removed in the current user's friend list
-        try:
-            friend_profile = friends.get(user__username=username)
+            logger.error("Invalid JSON")
+            return JsonResponse({'success': False, 'message': 'Invalid JSON'}, status=400)
+        except User.DoesNotExist:
+            logger.error(f"User not found: {friend_username}")
+            return JsonResponse({'success': False, 'message': 'User not found'}, status=404)
         except UserProfile.DoesNotExist:
-            print("User not found in friend list")
-            return JsonResponse({'success': False, 'message': 'User not found in friend list'})
-
-        # Remove the friend from the current user's friend list
-        user_profile.friends.remove(friend_profile)
-        print("Friend removed successfully")
-        
-        # Get the updated list of friends for the current user
-        updated_friends = user_profile.friends.all()
-        print(f"Current user's friends after removal: {[friend.user.username for friend in updated_friends]}")
-        
-        return JsonResponse({'success': True})
-    
+            logger.error(f"User profile not found for user: {friend_username}")
+            return JsonResponse({'success': False, 'message': 'User profile not found'}, status=404)
+        except Exception as e:
+            logger.error(f"Error deleting friend: {str(e)}")
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+@login_required
+def status_view(request):
+    user_profile = UserProfile.objects.get(user=request.user)
+    matches = user_profile.matches
+    wins = user_profile.wins
+    losses = user_profile.losses
+    winrate = (wins / matches * 100) if matches > 0 else 0
+    return JsonResponse({
+        'matches': matches,
+        'wins': wins,
+        'losses': losses,
+        'winrate': f'{winrate:.2f}%'
+    })
+
+@login_required
+def match_history_view(request):
+    user_profile = UserProfile.objects.get(user=request.user)
+    matches = Match.objects.filter(player1=user_profile.user).order_by('-date')
+    match_list = [{
+        'player1': match.player1.username,
+        'player2': match.player2.username if match.player2 else 'N/A',
+        'winner': match.winner.username,
+        'date': match.date.strftime('%Y-%m-%d %H:%M:%S'),
+        'details': match.details
+    } for match in matches]
+    return JsonResponse({'matches': match_list})
+
+def get_username_by_nickname(request):
+    nickname = request.GET.get('nickname')
+    try:
+        user_profile = UserProfile.objects.get(nickname=nickname)
+        username = user_profile.user.username
+        return JsonResponse({'username': username})
+    except UserProfile.DoesNotExist:
+        return JsonResponse({'username': None}, status=404)
+
+@csrf_exempt
+def update_status_counter(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        username = data.get('username')
+        result = data.get('result')
+
+        try:
+            user = User.objects.get(username=username)
+            user_profile = UserProfile.objects.get(user=user)
+
+            if result == 'won':
+                user_profile.wins += 1
+            elif result == 'lost':
+                user_profile.losses += 1
+
+            user_profile.matches += 1
+            user_profile.save()
+
+            return JsonResponse({'message': 'Status counter updated successfully'})
+        except User.DoesNotExist:
+            return JsonResponse({'message': 'User not found'}, status=404)
+        except UserProfile.DoesNotExist:
+            return JsonResponse({'message': 'User profile not found'}, status=404)
+
+    return JsonResponse({'message': 'Invalid request method'}, status=400)
+
+@csrf_exempt
+def record_game_history(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            player1_username = data.get('player1Username')
+            player2_nickname = data.get('player2Nickname', 'N/A')
+            winner = data.get('winner')
+            match_time = data.get('matchTime')
+            match_score = data.get('matchScore')
+
+            try:
+                player1 = User.objects.get(username=player1_username)
+            except User.DoesNotExist:
+                logger.error(f"User with username {player1_username} not found")
+                return JsonResponse({'message': f'User with username {player1_username} not found'}, status=404)
+
+            # Handle Player 2 as a non-registered user
+            player2 = None
+            if player2_nickname != 'N/A':
+                try:
+                    player2_profile = UserProfile.objects.get(nickname=player2_nickname)
+                    player2 = player2_profile.user
+                except UserProfile.DoesNotExist:
+                    logger.warning(f"User profile with nickname {player2_nickname} not found, treating as non-registered user")
+
+            # Determine the winner user object
+            winner_user = player1 if winner == player1_username else player2
+
+            Match.objects.create(
+                player1=player1,
+                player2=player2,
+                winner=winner_user,
+                date=match_time,
+                details=match_score
+            )
+
+            return JsonResponse({'message': 'Game history recorded successfully'})
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON in request body")
+            return JsonResponse({'message': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            logger.error(f"Unexpected error: {str(e)}")
+            return JsonResponse({'message': f'Unexpected error: {str(e)}'}, status=500)
+
+    logger.error("Invalid request method")
+    return JsonResponse({'message': 'Invalid request method'}, status=400)
 
 def home(request):
     return render(request, 'home.html')

@@ -1,28 +1,10 @@
 // friendlist.js
 
-// Utility function to get a cookie value by name
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '='))
-            {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
 // Function to show the friend list
 async function showFriendList() {
     hideAllContainers();
     const friendListContainer = document.getElementById('friendListContainer');
     friendListContainer.style.display = 'block';
-
     try {
         const response = await fetch('/get_friends/', {
             method: 'GET',
@@ -30,22 +12,34 @@ async function showFriendList() {
                 'X-CSRFToken': getCookie('csrftoken')
             }
         });
+        if (!response.ok) {
+            console.error('Response status:', response.status);
+            console.error('Response status text:', response.statusText);
+            throw new Error('Network response was not ok');
+        }
         const data = await response.json();
-        const friendListTableBody = document.getElementById('friendListTable').getElementsByTagName('tbody')[0];
-        friendListTableBody.innerHTML = ''; // Clear existing rows
-        data.friends.forEach(friend => {
-            const row = friendListTableBody.insertRow();
-            const usernameCell = row.insertCell(0);
-            const nicknameCell = row.insertCell(1);
-            const statusCell = row.insertCell(2);
-            const actionCell = row.insertCell(3);
-            usernameCell.textContent = friend.username;
-            nicknameCell.textContent = friend.nickname;
-            statusCell.textContent = friend.is_online ? 'Online' : 'Offline';
-            actionCell.innerHTML = `<button onclick="removeFriend('${friend.username}')">Remove</button>`;
-        });
+        if (data.friends) {  // Ensure data.friends exists
+            // Populate the friend list table
+            const friendListTableBody = document.getElementById('friendListTable').getElementsByTagName('tbody')[0];
+            friendListTableBody.innerHTML = ''; // Clear existing rows
+            data.friends.forEach(friend => {
+                const row = friendListTableBody.insertRow();
+                const usernameCell = row.insertCell(0);
+                const nicknameCell = row.insertCell(1);
+                const statusCell = row.insertCell(2);
+                const actionCell = row.insertCell(3);
+                usernameCell.textContent = friend.username;
+                nicknameCell.textContent = friend.nickname;
+                statusCell.textContent = friend.is_online ? 'Online' : 'Offline';
+                actionCell.innerHTML = `<button onclick="removeFriend('${friend.username}')">Remove</button>`;
+            });
+        } else {
+            console.error('Error fetching friend list:', data.message);
+            alert('Error fetching friend list: ' + data.message);
+        }
     } catch (error) {
         console.error('Error fetching friend list:', error);
+        alert('An error occurred while fetching the friend list.');
     }
 }
 
@@ -65,10 +59,18 @@ async function handleAddFriend(event) {
         const response = await fetch('/add_friend/', {
             method: 'POST',
             headers: {
-                'X-CSRFToken': csrfToken
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json'
             },
-            body: formData
+            body: JSON.stringify({
+                username: formData.get('username')
+            })
         });
+        if (!response.ok) {
+            console.error('Response status:', response.status);
+            console.error('Response status text:', response.statusText);
+            throw new Error('Network response was not ok');
+        }
         const data = await response.json();
         if (data.success) {
             alert('Friend added successfully');
@@ -93,6 +95,11 @@ async function removeFriend(username) {
             },
             body: JSON.stringify({ username: username })
         });
+        if (!response.ok) {
+            console.error('Response status:', response.status);
+            console.error('Response status text:', response.statusText);
+            throw new Error('Network response was not ok');
+        }
         const data = await response.json();
         if (data.success) {
             alert('Friend removed successfully');
@@ -104,23 +111,6 @@ async function removeFriend(username) {
         console.error('Error removing friend:', error);
         alert('An error occurred while trying to remove the friend.');
     }
-}
-
-// Function to hide all containers
-function hideAllContainers() {
-    const containers = [
-        'menuContainer', 'gameContainer', 'nicknameContainer', 'gameContent',
-        'scoreDisplay', 'tournamentContainer', 'tournamentBracket', 'loginContainer',
-        'signInContainer', 'guestMenuContainer', 'gameModeContainer', 'updateProfileContainer',
-        'profileContainer', 'friendListContainer', 'addFriendContainer'
-    ];
-
-    containers.forEach(containerId => {
-        const container = document.getElementById(containerId);
-        if (container) {
-            container.style.display = 'none';
-        }
-    });
 }
 
 // Event listener for DOM content loaded

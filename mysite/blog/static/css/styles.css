@@ -20,6 +20,23 @@ body {
     margin: 20px 0;
 }
 
+.overlay-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border: 1px solid #ccc;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.gameContainer {
+    position: relative;
+    z-index: 500;
+}
+
 .container {
     display: none;
     flex-direction: column;
@@ -166,4 +183,47 @@ button:hover {
 
 .edit-profile-button:hover {
     background-color: #45a049;
+}
+
+/* Ensure the tournament form container has enough margin to avoid overlapping with the user stripe */
+#tournamentContainer {
+    margin-left: 60px; /* Adjust this value as needed */
+    max-width: 400px; /* Ensure the form doesn't exceed a certain width */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Adjust the form fields to fit within the container */
+#tournamentForm .form-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+#tournamentForm input[type="text"], #tournamentForm input[type="number"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+    max-width: 300px;
+    box-sizing: border-box;
+}
+
+#tournamentForm button {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    width: 100%;
+    max-width: 200px;
+    box-sizing: border-box;
+}
+
+#tournamentForm button:hover {
+    background-color: #218838;
 }

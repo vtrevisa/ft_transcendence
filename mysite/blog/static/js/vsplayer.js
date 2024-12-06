@@ -9,28 +9,44 @@ let player1Nickname = "Player 1";
 let player2Nickname = "Player 2";
 let gameStarted = false;
 let ball, player1, player2, gameInterval;
-let isTournamentMode = false; // Flag to check if in tournament mode
+window.isTournamentMode = false; // Define isTournamentMode globally
 
 const paddleSpeed = 12;
 let player1Y = canvas.height / 2 - 30;
 let player2Y = canvas.height / 2 - 30;
 const maxScore = 5;
 
-function startVsPlayerGame(tournamentMode = false) {
-    isTournamentMode = tournamentMode;
-    player1Nickname = document.getElementById('player1Nickname').value || "Player 1";
-    player2Nickname = document.getElementById('player2Nickname').value || "Player 2";
+// Load all necessary containers
+const nicknameContainer = document.getElementById('nicknameContainer');
+const gameContainer = document.getElementById('gameContainer');
+const scoreDisplay = document.getElementById('scoreDisplay');
+const buttonContainer = document.querySelector('.button-container');
+const tButtonContainer = document.querySelector('.tButton-container');
+
+// Global mapping object
+const nicknameToUsernameMap = {};
+
+async function startVsPlayerGame(tournamentMode = false) {
+    window.isTournamentMode = tournamentMode;
+    const player1Nickname = document.getElementById('player1Nickname').value || "Player 1";
+    const player2Nickname = document.getElementById('player2Nickname').value || "Player 2";
+
+    // Fetch username for Player 1 from the server
+    const player1Username = await fetchUsernameByNickname(player1Nickname);
+
+    // Populate the mapping object
+    nicknameToUsernameMap[player1Nickname] = player1Username;
 
     nicknameContainer.style.display = 'none';
-    gameContent.style.display = 'block';
+    gameContainer.style.display = 'block';
     scoreDisplay.style.display = 'block';  // Make sure score is visible at the start
 
-    if (isTournamentMode) {
-        document.querySelector('.button-container').style.display = 'none';
-        document.querySelector('.tButton-container').style.display = 'none';
+    if (window.isTournamentMode) {
+        buttonContainer.style.display = 'none';
+        tButtonContainer.style.display = 'none';
     } else {
-        document.querySelector('.button-container').style.display = 'block';
-        document.querySelector('.tButton-container').style.display = 'none';
+        buttonContainer.style.display = 'block';
+        tButtonContainer.style.display = 'none';
     }
 
     resetGame();
@@ -51,8 +67,8 @@ function resetGame() {
     if (gameInterval) {
         clearInterval(gameInterval);
         gameInterval = null; // Clear the interval reference
-        gameStarted = false; // Set game as not started
     }
+    gameStarted = false; // Ensure gameStarted is set to false
 }
 
 function startGame() {
@@ -60,25 +76,19 @@ function startGame() {
     draw();
     if (gameInterval) clearInterval(gameInterval);
     gameInterval = setInterval(() => updateGame(), 1000 / 60); // 60 fps
+    gameStarted = true; // Set gameStarted to true when starting the game
 }
 
+// Update the updateGame function to call endGame when the game ends
 function updateGame() {
     moveBall();
     detectCollision();
     draw();
-
     if (player1Score >= maxScore || player2Score >= maxScore) {
-        const winner = player1Score >= maxScore ? player1Nickname : player2Nickname;
-        scoreDisplay.textContent = `${winner} wins! Final Score: ${player1Nickname} ${player1Score} - ${player2Nickname} ${player2Score}`;
-
-        clearInterval(gameInterval);
-        gameInterval = null; // Clear the interval reference
-
-        if (isTournamentMode) {
-            document.querySelector('.button-container').style.display = 'none';
-            document.querySelector('.tButton-container').style.display = 'block';
-            handleMatchWinner(winner);
-        }
+        if (window.isTournamentMode)
+            endTournamentGame();
+        else
+            endGame();
         return;
     }
     updateScore(); // Update score display if game is still ongoing
@@ -154,13 +164,13 @@ document.addEventListener('keydown', (event) => {
         if (event.key === 'w' && player1Y > 0) {
             player1Y -= paddleSpeed; // Move player 1 up
         }
-        if (event.key === 's' && player1Y < canvas.height - player1.height) {
+        if (event.key === 's' && player1Y < canvas.height - 60) { // Use the actual paddle height
             player1Y += paddleSpeed; // Move player 1 down
         }
         if (event.key === 'ArrowUp' && player2Y > 0) {
             player2Y -= paddleSpeed; // Move player 2 up
         }
-        if (event.key === 'ArrowDown' && player2Y < canvas.height - player2.height) {
+        if (event.key === 'ArrowDown' && player2Y < canvas.height - 60) { // Use the actual paddle height
             player2Y += paddleSpeed; // Move player 2 down
         }
     }
@@ -193,3 +203,45 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Canvas element not found');
     }
 });
+
+function endGame() {
+    // Retrieve player nicknames
+    const player1Nickname = document.getElementById('player1Nickname').value;
+    const player2Nickname = document.getElementById('player2Nickname').value;
+
+    // Retrieve the correct username for Player 1 using the mapping object
+    const player1Username = nicknameToUsernameMap[player1Nickname];
+
+    // Determine the outcome
+    const player1_won = player1Score >= maxScore;
+    const outcome = player1_won ? 'won' : 'lost';
+    const winner = player1_won ? player1Username : player2Nickname;
+
+    // Retrieve match information
+    const matchTime = new Date().toISOString(); // Format the date correctly
+    const matchScore = `${player1Score} - ${player2Score}`;
+
+    // Print information on the console
+    console.log(`Player 1 (Username: ${player1Username}, Nickname: ${player1Nickname}) ${outcome} the match.`);
+    console.log(`Match Score: ${matchScore}`);
+    console.log(`Match Time: ${matchTime}`);
+    console.log(`Player 2 (Nickname: ${player2Nickname})`);
+
+    // Update status counter
+    updateStatusCounter(player1Username, outcome);
+
+    // Record game history
+    recordGameHistory(player1Username, player2Nickname, winner, matchTime, matchScore);
+
+    // Handle the end of the game
+    scoreDisplay.textContent = `${player1_won ? player1Nickname : player2Nickname} wins! Final Score: ${player1Nickname} ${player1Score} - ${player2Nickname} ${player2Score}`;
+    clearInterval(gameInterval);
+    gameInterval = null; // Clear the interval reference
+
+    if (window.isTournamentMode) {
+        endTournamentGame();
+    } else {
+        buttonContainer.style.display = 'block';
+        tButtonContainer.style.display = 'none';
+    }
+}

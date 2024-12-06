@@ -6,6 +6,7 @@ let winners = [];
 let tournamentStage = 'quarterfinals';
 
 function startTournament() {
+    window.isTournamentMode = true;
     // Reset current match index
     currentMatchIndex = 0;
     winners = [];
@@ -85,15 +86,52 @@ function playMatch(matchIndex) {
 }
 
 function nextMatch() {
+    console.log('Next match called');
     // Hide the Next Match button and show the Reset Game button
-    document.getElementById('gameContent').style.display = 'none';
-    document.querySelector('.tButton-container').style.display = 'none';
-    document.querySelector('.button-container').style.display = 'none';
+    const gameContainer = document.getElementById('gameContainer');
+    if (gameContainer) {
+        gameContainer.style.display = 'none';
+    } else {
+        console.error('gameContainer element not found');
+    }
+    const tButtonContainer = document.querySelector('.tButton-container');
+    if (tButtonContainer) {
+        tButtonContainer.style.display = 'none';
+    } else {
+        console.error('tButton-container element not found');
+    }
+    const buttonContainer = document.querySelector('.button-container');
+    if (buttonContainer) {
+        buttonContainer.style.display = 'none';
+    } else {
+        console.error('button-container element not found');
+    }
     // Move to the next match
     currentMatchIndex++;
-    displayMatch(currentMatchIndex);
+    if (currentMatchIndex < matches.length) {
+        displayMatch(currentMatchIndex);
+    } else {
+        if (tournamentStage === 'quarterfinals') {
+            // Proceed to semifinals
+            tournamentStage = 'semifinals';
+            currentMatchIndex = 0;
+            matches = organizeMatches('semi');
+            winners = [];
+            displayMatch(currentMatchIndex);
+        } else if (tournamentStage === 'semifinals') {
+            // Proceed to finals
+            tournamentStage = 'final';
+            currentMatchIndex = 0;
+            matches = organizeMatches('final');
+            winners = [];
+            displayMatch(currentMatchIndex);
+        } else if (tournamentStage === 'final') {
+            // All matches are done
+            endTournament();
+        }
+    }
 }
-	
+
 function endTournament() {
     // Logic to end the tournament
     const tournamentWinner = winners[winners.length - 1];
@@ -107,3 +145,65 @@ function handleMatchWinner(winner) {
     alert(`${winner} wins the match!`);
     nextMatch();
 }
+
+function endTournamentGame() {
+    // Retrieve player nicknames
+    const player1Nickname = document.getElementById('player1Nickname').value;
+    const player2Nickname = document.getElementById('player2Nickname').value;
+
+    // Retrieve the correct username for Player 1 using the mapping object
+    const player1Username = nicknameToUsernameMap[player1Nickname];
+
+    // If Player 1 or Player 2 are not found as the logged user, proceed without recording anything
+    if (!player1Username) {
+        console.warn('Player 1 not found as the logged user. Proceeding without recording.');
+        handleMatchWinner(player1Nickname);
+        resetGame(); // Reset the game after the match ends
+        return;
+    }
+
+    // Determine the outcome
+    const player1_won = player1Score >= maxScore;
+    const outcome = player1_won ? 'won' : 'lost';
+    const winner = player1_won ? player1Username : player2Nickname;
+
+    // Retrieve match information
+    const matchTime = new Date().toISOString(); // Format the date correctly
+    const matchScore = `${player1Score} - ${player2Score}`;
+
+    // Print information on the console
+    console.log(`Player 1 (Username: ${player1Username}, Nickname: ${player1Nickname}) ${outcome} the match.`);
+    console.log(`Match Score: ${matchScore}`);
+    console.log(`Match Time: ${matchTime}`);
+    console.log(`Player 2 (Nickname: ${player2Nickname})`);
+
+    // Update status counter
+    updateStatusCounter(player1Username, outcome);
+
+    // Record game history
+    recordGameHistory(player1Username, player2Nickname, winner, matchTime, matchScore);
+
+    // Handle the end of the game
+    scoreDisplay.textContent = `${player1_won ? player1Nickname : player2Nickname} wins! Final Score: ${player1Nickname} ${player1Score} - ${player2Nickname} ${player2Score}`;
+    clearInterval(gameInterval);
+    gameInterval = null; // Clear the interval reference
+
+    buttonContainer.style.display = 'none';
+    tButtonContainer.style.display = 'block';
+
+    handleMatchWinner(winner);
+    resetGame(); // Reset the game after the match ends
+}
+
+// Event listener for DOM content loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM content loaded');
+    // Add event listener for the "Next Match" button
+    const nextMatchButton = document.getElementById('nextMatchButton');
+    if (nextMatchButton) {
+        nextMatchButton.addEventListener('click', nextMatch);
+        console.log('Next Match button event listener added'); // Debugging log
+    } else {
+        console.error('Next Match button not found'); // Debugging log
+    }
+});

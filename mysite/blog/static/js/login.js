@@ -1,32 +1,22 @@
 // login.js
 
-// Function to get a cookie value by name
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
 // Function to check if the user is logged in
-function checkLoginStatus() {
-    fetch('/check_login/', {
-        method: 'GET',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken')
+async function checkLoginStatus() {
+    try {
+        const response = await fetch('/check_login/', {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        });
+        if (!response.ok) {
+            console.log('No login detected');
+            returnToMenu();
+            return;
         }
-    })
-    .then(response => response.json())
-    .then(data => {
+        const data = await response.json();
         if (data.logged_in) {
+            isOnline = true;
             document.getElementById('loginButton').style.display = 'none';
             document.getElementById('signInButton').style.display = 'none';
             document.getElementById('playAsGuestButton').style.display = 'none';
@@ -35,27 +25,31 @@ function checkLoginStatus() {
         } else {
             returnToMenu();
         }
-    })
-    .catch(error => {
+    } catch (error) {
         console.error('Error:', error);
-    });
+        returnToMenu();
+    }
 }
 
 // Function to handle login form submission
-function handleLogin(event) {
+async function handleLogin(event) {
     event.preventDefault();
     const formData = new FormData(document.getElementById('loginForm'));
     const csrfToken = getCookie('csrftoken');
-    fetch('/login/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': csrfToken
-        },
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
+    try {
+        const response = await fetch('/login/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            body: formData
+        });
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
         if (data.success) {
+            isOnline = true;
             displayProfile(data);
             document.getElementById('loginContainer').style.display = 'none';
             document.getElementById('loginButton').style.display = 'none';
@@ -65,48 +59,29 @@ function handleLogin(event) {
         } else {
             alert('Login failed: ' + data.message);
         }
-    })
-    .catch(error => {
+    } catch (error) {
         console.error('Error:', error);
-    });
+    }
 }
 
 // Function to handle logout
-function logout() {
+async function logout() {
     const csrfToken = getCookie('csrftoken');
-    fetch('/logout/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': csrfToken
-        }
-    })
-    .then(response => {
+    try {
+        const response = await fetch('/logout/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        });
         if (response.ok) {
             window.location.reload();
         } else {
             alert('Logout failed');
         }
-    })
-    .catch(error => {
+    } catch (error) {
         console.error('Error:', error);
-    });
-}
-
-// Function to hide all containers
-function hideAllContainers() {
-    if (menuContainer) menuContainer.style.display = 'none';
-    if (gameContainer) gameContainer.style.display = 'none';
-    if (nicknameContainer) nicknameContainer.style.display = 'none';
-    if (gameContent) gameContent.style.display = 'none';
-    if (scoreDisplay) scoreDisplay.style.display = 'none';
-    if (tournamentContainer) tournamentContainer.style.display = 'none';
-    if (tournamentBracket) tournamentBracket.style.display = 'none';
-    if (loginContainer) loginContainer.style.display = 'none';
-    if (signInContainer) signInContainer.style.display = 'none';
-    if (guestMenuContainer) guestMenuContainer.style.display = 'none';
-    if (gameModeContainer) gameModeContainer.style.display = 'none';
-    if (updateProfileContainer) updateProfileContainer.style.display = 'none';
-    if (profileContainer) profileContainer.style.display = 'none';
+    }
 }
 
 // Event listener for DOM content loaded
@@ -114,8 +89,14 @@ document.addEventListener('DOMContentLoaded', function() {
     checkLoginStatus();
 
     // Event listener for login form submission
-    document.getElementById('loginForm').addEventListener('submit', handleLogin);
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
 
     // Event listener for logout button
-    document.getElementById('logoutButton').addEventListener('click', logout);
+    const logoutButton = document.getElementById('logoutButton');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', logout);
+    }
 });

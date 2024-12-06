@@ -1,5 +1,6 @@
 <!-- home.html -->
 {% load static %}
+{% csrf_token %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,20 +12,22 @@
 <body>
     <header>
         <div class="profile-container" id="profileContainer" style="display: none;">
-            <img id="profileAvatar" src="{% static 'images/default_avatar.png' %}" alt="User Avatar" class="profile-avatar">
+            <img id="profileAvatar" src="{% static 'default_avatar.png' %}" alt="User Avatar" class="profile-avatar">
             <div class="profile-info">
                 <p><strong>Username:</strong> <span id="profileUsername"></span></p>
                 <p><strong>Email:</strong> <span id="profileEmail"></span></p>
                 <p><strong>Nickname:</strong> <span id="profileNickname"></span></p>
                 <button id="editProfileButton" class="edit-profile-button" onclick="showUpdateProfile()">Edit Profile</button>
                 <button id="friendListButton" class="friend-list-button" onclick="showFriendList()">Friend List</button>
+                <button id="statusButton" class="status-button" onclick="showStatus()">Status</button>
+                <button id="matchHistoryButton" class="match-history-button" onclick="showMatchHistory()">Match History</button>
             </div>
         </div>
         <button id="logoutButton" class="logout-button" style="display: none;" onclick="logout()">Logout</button>
     </header>
 
     <!-- Main Menu Container -->
-    <div class="menu-container" id="menuContainer">
+    <div class="container menu-container" id="menuContainer">
         <h1>Pongon-line</h1>
         <button id="loginButton" onclick="showLogin()">Login</button>
         <button id="signInButton" onclick="showSignIn()">Sign In</button>
@@ -117,9 +120,9 @@
     </div>
 
     <!-- Game Container -->
-    <div class="container" id="gameContainer" style="display: none;">
+    <div class="container gameContainer" id="gameContainer" style="display: none;">
         <h1>Pongon-line</h1>
-        <div id="score"></div>
+        <div id="scoreDisplay"></div>
         <canvas id="gameCanvas" width="600" height="400"></canvas>
         <div class="button-container">
             <button onclick="resetGame()">Reset Game</button>
@@ -127,17 +130,19 @@
         </div>
     </div>
 
-    <!-- Nickname Container -->
-    <div class="container" id="nicknameContainer" style="display: none;">
-        <h2>Enter Player Nicknames</h2>
-        <input type="text" id="player1Nickname" placeholder="Player 1 Nickname">
-        <input type="text" id="player2Nickname" placeholder="Player 2 Nickname">
-        <button onclick="startVsPlayerGame()">Start Game</button>
-        <button onclick="returnToMenu()">Return to Menu</button>
-    </div>
+<!-- Nickname Container -->
+<div class="container" id="nicknameContainer" style="display: none;">
+    <h2>Enter Player Nicknames</h2>
+    <input type="text" id="player1Nickname" placeholder="Player 1 Nickname">
+    <input type="hidden" id="player1Username" value=""> <!-- Hidden input for Player 1 Username -->
+    <input type="text" id="player2Nickname" placeholder="Player 2 Nickname">
+    <input type="hidden" id="player2Username" value=""> <!-- Hidden input for Player 2 Username -->
+    <button onclick="startVsPlayerGame()">Start Game</button>
+    <button onclick="returnToMenu()">Return to Menu</button>
+</div>
 
     <!-- Tournament Button Container -->
-    <div class="container" id="tButtonContainer" style="display: none;">
+    <div class="container tButton-container" style="display: none;">
         <button onclick="nextMatch()">Next Match</button>
         <button onclick="endTournament()">End Tournament</button>
     </div>
@@ -166,12 +171,52 @@
         </div>
     </div>
 
-    <script src="{% static 'js/tournament.js' %}"></script>
-    <script src="{% static 'js/menu.js' %}"></script>
-    <script src="{% static 'js/vsplayer.js' %}"></script>
-    <script src="{% static 'js/signIn.js' %}"></script>
-    <script src="{% static 'js/login.js' %}"></script>
-    <script src="{% static 'js/profile.js' %}"></script>
-    <script src="{% static 'js/friendlist.js' %}"></script>
+    <!-- Match History Container -->
+    <div class="container" id="matchHistoryContainer" style="display: none;">
+        <h2>Match History</h2>
+        <table id="matchHistoryTable">
+            <thead>
+                <tr>
+                    <th>Player 1</th>
+                    <th>Player 2</th>
+                    <th>Winner</th>
+                    <th>Date</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Match history will be populated here -->
+            </tbody>
+        </table>
+        <button onclick="returnToMenu()">Return to Menu</button>
+    </div>
+
+    <!-- Status Container -->
+    <div class="container" id="statusContainer" style="display: none;">
+        <h2>Status</h2>
+        <table id="statusTable">
+            <thead>
+                <tr>
+                    <th>Matches</th>
+                    <th>Wins</th>
+                    <th>Losses</th>
+                    <th>Winrate</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Status data will be populated here -->
+            </tbody>
+        </table>
+        <button onclick="returnToMenu()">Return to Menu</button>
+    </div>
+
+    <!-- Load JavaScript files at the end of the body -->
+    <script src="{% static 'js/common.js' %}" defer></script>
+    <script src="{% static 'js/vsplayer.js' %}" defer></script>
+    <script src="{% static 'js/tournament.js' %}" defer></script>
+    <script src="{% static 'js/friendlist.js' %}" defer></script>
+    <script src="{% static 'js/login.js' %}" defer></script>
+    <script src="{% static 'js/profile.js' %}" defer></script>
+    <script src="{% static 'js/menu.js' %}" defer></script>
 </body>
 </html>
