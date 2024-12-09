@@ -76,8 +76,16 @@ function displayMatch(index) {
 
 function playMatch(matchIndex) {
     // Set player nicknames for vsPlayer game
-    document.getElementById('player1Nickname').value = matches[matchIndex][0];
-    document.getElementById('player2Nickname').value = matches[matchIndex][1];
+    const player1Nickname = matches[matchIndex][0];
+    const player2Nickname = matches[matchIndex][1];
+
+    document.getElementById('player1Nickname').value = player1Nickname;
+    document.getElementById('player2Nickname').value = player2Nickname;
+
+    // Update the global player nicknames
+    window.player1Nickname = player1Nickname;
+    window.player2Nickname = player2Nickname;
+
     tournamentBracket.style.display = 'none';
     document.querySelector('.button-container').style.display = 'none';
     document.querySelector('.tButton-container').style.display = 'none';

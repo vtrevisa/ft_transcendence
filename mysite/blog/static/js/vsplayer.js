@@ -141,6 +141,8 @@ function detectCollision() {
 }
 
 function updateScore() {
+    const player1Nickname = window.player1Nickname || "Player 1";
+    const player2Nickname = window.player2Nickname || "Player 2";
     scoreDisplay.textContent = `${player1Nickname}: ${player1Score} | ${player2Nickname}: ${player2Score}`;
 }
 
