@@ -1,5 +1,6 @@
 <!-- home.html -->
 {% load static %}
+{% csrf_token %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,37 +8,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pongon-line</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <title>Home</title>
+    <script type="text/javascript">
+        function openLoginPopup() {
+            var width = 600;
+            var height = 700;
+            var left = (screen.width - width) / 2;
+            var top = (screen.height - height) / 2;
+            var url = "{% url 'login42' %}";
+            var params = 'menubar=no,toolbar=no,status=no,width=' + width + ',height=' + height + ',top=' + top + ',left=' + left;
+            window.open(url, 'Login with 42', params);
+        }
+    </script>
 </head>
 <body>
-    <div class="menu-container" id="menuContainer">
+    <header>
+        <div class="profile-container" id="profileContainer" style="display: none;">
+            <img id="profileAvatar" src="{% static 'default_avatar.png' %}" alt="User Avatar" class="profile-avatar">
+            <div class="profile-info">
+                <p><strong>Username:</strong> <span id="profileUsername"></span></p>
+                <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+                <p><strong>Nickname:</strong> <span id="profileNickname"></span></p>
+                <button id="editProfileButton" class="edit-profile-button" onclick="showUpdateProfile()">Edit Profile</button>
+                <button id="friendListButton" class="friend-list-button" onclick="showFriendList()">Friend List</button>
+                <button id="statusButton" class="status-button" onclick="showStatus()">Status</button>
+                <button id="matchHistoryButton" class="match-history-button" onclick="showMatchHistory()">Match History</button>
+            </div>
+        </div>
+        <button id="logoutButton" class="logout-button" style="display: none;" onclick="logout()">Logout</button>
+    </header>
+
+    {% if user.is_authenticated %}
+        <p>Welcome, {{ user.username }}!</p>
+        <p><a href="{% url 'logout42' %}">Logout</a></p>
+    {% else %}
+        <p>You are not logged in.</p>
+        <p><button onclick="openLoginPopup()">Login with 42</button></p>
+    {% endif %}
+
+
+    <!-- Main Menu Container -->
+    <div class="container menu-container" id="menuContainer">
         <h1>Pongon-line</h1>
-        <button onclick="selectMenu('account')">Account</button>
-        <button onclick="selectMenu('guest')">Play as Guest</button>
+        <button id="loginButton" onclick="showLogin()">Login</button>
+        <button id="signInButton" onclick="showSignIn()">Sign In</button>
+        <button id="playAsGuestButton" onclick="playAsGuest()">Play as Guest</button>
     </div>
-    <div class="auth-container" id="authContainer" style="display: none;">
-        <button onclick="showSignIn()">Sign In</button>
-        <button onclick="showLogin()">Login</button>
-    </div>
-    <div class="sign-in-container" id="signInContainer" style="display: none;">
-        <h2>Sign In</h2>
-        <form id="signInForm" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="form-row">
-                <input type="text" id="signInUsername" name="username" placeholder="Username" required>
-                <input type="password" id="signInPassword" name="password" placeholder="Password" required>
-            </div>
-            <div class="form-row">
-                <input type="email" id="signInEmail" name="email" placeholder="Email" required>
-                <input type="text" id="signInNickname" name="nickname" placeholder="Nickname" required>
-            </div>
-            <div class="form-row">
-                <input type="file" id="signInAvatar" name="avatar" accept="image/*" required>
-            </div>
-            <button type="submit">Submit</button>
-        </form>
+
+    <!-- Game Mode Container -->
+    <div class="container game-mode-container" id="gameModeContainer" style="display: none;">
+        <button id="vsGameButton" onclick="selectMode('vsPlayer')">VS Game</button>
+        <button id="tournamentButton" onclick="selectMode('tournament')">Tournament</button>
         <button onclick="returnToMenu()">Return to Menu</button>
     </div>
-    <div class="login-container" id="loginContainer" style="display: none;">
+
+    <!-- Login Form Container -->
+    <div class="container" id="loginContainer" style="display: none;">
         <h2>Login</h2>
         <form id="loginForm">
             {% csrf_token %}
@@ -49,47 +76,101 @@
         </form>
         <button onclick="returnToMenu()">Return to Menu</button>
     </div>
-    <div class="profile-container" id="profileContainer" style="display: none;">
-        <div class="profile-strip">
-            <img id="profileAvatar" src="" alt="Profile Avatar" class="profile-avatar">
-            <div class="profile-info">
-                <p><strong>Username:</strong> <span id="profileUsername"></span></p>
-                <p><strong>Email:</strong> <span id="profileEmail"></span></p>
-                <p><strong>Nickname:</strong> <span id="profileNickname"></span></p>
-                <p><strong>Joined:</strong> <span id="profileJoinedDate"></span></p>
-                <p><strong>Last Login:</strong> <span id="profileLastLogin"></span></p>
+
+    <!-- Sign-In Form Container -->
+    <div class="container" id="signInContainer" style="display: none;">
+        <h2>Sign In</h2>
+        <form id="signInForm">
+            {% csrf_token %}
+            <div class="form-row">
+                <input type="text" id="signInUsername" name="username" placeholder="Username" required>
+                <input type="password" id="signInPassword" name="password" placeholder="Password" required>
+                <input type="email" id="signInEmail" name="email" placeholder="Email" required>
+                <input type="text" id="signInNickname" name="nickname" placeholder="Nickname" required>
+                <input type="file" id="signInAvatar" name="avatar" placeholder="Avatar">
             </div>
-        </div>
-        <button onclick="showEditProfile()">Edit Profile</button>
-        <div class="play-button-container" id="playButtonContainer">
-            <button class="play-button" onclick="selectMenu('game')">Play</button>
-        </div>
-        <div class="edit-profile-form" id="editProfileForm" style="display: none;">
-            <input type="text" id="newNickname" placeholder="New Nickname">
-            <input type="file" id="newAvatar" accept="image/*">
-            <button onclick="submitProfileChanges()">Submit</button>
-        </div>
+            <button type="submit">Sign In</button>
+        </form>
+        <button onclick="returnToMenu()">Return to Menu</button>
     </div>
-    <div class="game-container" id="gameContainer" style="display: none;">
+
+    <!-- Profile Update Form Container -->
+    <div class="container" id="updateProfileContainer" style="display: none;">
+        <h2>Update Profile</h2>
+        <form id="updateProfileForm">
+            {% csrf_token %}
+            <div class="form-row">
+                <input type="email" id="updateEmail" name="email" placeholder="Email">
+                <input type="text" id="updateNickname" name="nickname" placeholder="Nickname">
+                <input type="file" id="updateAvatar" name="avatar" placeholder="Avatar">
+            </div>
+            <button type="submit">Update Profile</button>
+        </form>
+        <button onclick="returnToMenu()">Return to Menu</button>
+    </div>
+
+    <!-- Friend List Container -->
+    <div class="container" id="friendListContainer" style="display: none;">
+        <h2>Friend List</h2>
+        <table id="friendListTable">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Nickname</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Friend list will be populated here -->
+            </tbody>
+        </table>
+        <button onclick="showAddFriendForm()">Add Friend</button>
+        <button onclick="returnToMenu()">Return to Menu</button>
+    </div>
+
+    <!-- Add Friend Form Container -->
+    <div class="container" id="addFriendContainer" style="display: none;">
+        <h2>Add Friend</h2>
+        <form id="addFriendForm">
+            {% csrf_token %}
+            <div class="form-row">
+                <input type="text" id="friendUsername" name="username" placeholder="Username" required>
+            </div>
+            <button type="submit">Add Friend</button>
+        </form>
+        <button onclick="showFriendList()">Return to Friend List</button>
+    </div>
+
+    <!-- Game Container -->
+    <div class="container gameContainer" id="gameContainer" style="display: none;">
         <h1>Pongon-line</h1>
-        <div id="score"></div>
+        <div id="scoreDisplay"></div>
         <canvas id="gameCanvas" width="600" height="400"></canvas>
         <div class="button-container">
             <button onclick="resetGame()">Reset Game</button>
             <button onclick="returnToMenu()">Return to Menu</button>
         </div>
     </div>
-    <div class="nickname-container" id="nicknameContainer" style="display: none;">
-        <h2>Enter Player Nicknames</h2>
-        <input type="text" id="player1Nickname" placeholder="Player 1 Nickname">
-        <input type="text" id="player2Nickname" placeholder="Player 2 Nickname">
-        <button onclick="startVsPlayerGame()">Start Game</button>
-    </div>
-    <div class="tButton-container" style="display: none;">
+
+<!-- Nickname Container -->
+<div class="container" id="nicknameContainer" style="display: none;">
+    <h2>Enter Player Nicknames</h2>
+    <input type="text" id="player1Nickname" placeholder="Player 1 Nickname">
+    <input type="hidden" id="player1Username" value=""> <!-- Hidden input for Player 1 Username -->
+    <input type="text" id="player2Nickname" placeholder="Player 2 Nickname">
+    <input type="hidden" id="player2Username" value=""> <!-- Hidden input for Player 2 Username -->
+    <button onclick="startVsPlayerGame()">Start Game</button>
+    <button onclick="returnToMenu()">Return to Menu</button>
+</div>
+
+    <!-- Tournament Button Container -->
+    <div class="container tButton-container" style="display: none;">
         <button onclick="nextMatch()">Next Match</button>
         <button onclick="endTournament()">End Tournament</button>
     </div>
-    <div class="tournament-container" id="tournamentContainer" style="display: none;">
+
+    <!-- Tournament Container -->
+    <div class="container" id="tournamentContainer" style="display: none;">
         <h2>Enter Tournament Player Nicknames</h2>
         <input type="text" id="player1" placeholder="Player 1 Nickname">
         <input type="text" id="player2" placeholder="Player 2 Nickname">
@@ -100,19 +181,65 @@
         <input type="text" id="player7" placeholder="Player 7 Nickname">
         <input type="text" id="player8" placeholder="Player 8 Nickname">
         <button onclick="startTournament()">Start Tournament</button>
+        <button onclick="returnToMenu()">Return to Menu</button>
     </div>
-    <div id="tournamentBracket" style="display: none;">
+
+    <!-- Tournament Bracket Container -->
+    <div class="container" id="tournamentBracket" style="display: none;">
         <h2>Tournament Bracket</h2>
         <div id="quarterfinals">
             <h3>Quarterfinals</h3>
             <!-- Quarterfinals pairings will be displayed here -->
         </div>
     </div>
-    <script src="{% static 'js/tournament.js' %}"></script>
-    <script src="{% static 'js/menu.js' %}"></script>
-    <script src="{% static 'js/vsplayer.js' %}"></script>
-    <script src="{% static 'js/signIn.js' %}"></script>
-    <script src="{% static 'js/login.js' %}"></script>
-    <script src="{% static 'js/profile.js' %}"></script>
+
+    <!-- Match History Container -->
+    <div class="container" id="matchHistoryContainer" style="display: none;">
+        <h2>Match History</h2>
+        <table id="matchHistoryTable">
+            <thead>
+                <tr>
+                    <th>Player 1</th>
+                    <th>Player 2</th>
+                    <th>Winner</th>
+                    <th>Date</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Match history will be populated here -->
+            </tbody>
+        </table>
+        <button onclick="returnToMenu()">Return to Menu</button>
+    </div>
+
+    <!-- Status Container -->
+    <div class="container" id="statusContainer" style="display: none;">
+        <h2>Status</h2>
+        <table id="statusTable">
+            <thead>
+                <tr>
+                    <th>Matches</th>
+                    <th>Wins</th>
+                    <th>Losses</th>
+                    <th>Winrate</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Status data will be populated here -->
+            </tbody>
+        </table>
+        <button onclick="returnToMenu()">Return to Menu</button>
+    </div>
+    
+
+    <!-- Load JavaScript files at the end of the body -->
+    <script src="{% static 'js/common.js' %}" defer></script>
+    <script src="{% static 'js/vsplayer.js' %}" defer></script>
+    <script src="{% static 'js/tournament.js' %}" defer></script>
+    <script src="{% static 'js/friendlist.js' %}" defer></script>
+    <script src="{% static 'js/login.js' %}" defer></script>
+    <script src="{% static 'js/profile.js' %}" defer></script>
+    <script src="{% static 'js/menu.js' %}" defer></script>
 </body>
 </html>
