@@ -8,6 +8,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pongon-line</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <title>Home</title>
+    <script type="text/javascript">
+        function openLoginPopup() {
+            var width = 600;
+            var height = 700;
+            var left = (screen.width - width) / 2;
+            var top = (screen.height - height) / 2;
+            var url = "{% url 'login42' %}";
+            var params = 'menubar=no,toolbar=no,status=no,width=' + width + ',height=' + height + ',top=' + top + ',left=' + left;
+            window.open(url, 'Login with 42', params);
+        }
+    </script>
 </head>
 <body>
     <header>
@@ -25,6 +38,15 @@
         </div>
         <button id="logoutButton" class="logout-button" style="display: none;" onclick="logout()">Logout</button>
     </header>
+
+    {% if user.is_authenticated %}
+        <p>Welcome, {{ user.username }}!</p>
+        <p><a href="{% url 'logout42' %}">Logout</a></p>
+    {% else %}
+        <p>You are not logged in.</p>
+        <p><button onclick="openLoginPopup()">Login with 42</button></p>
+    {% endif %}
+
 
     <!-- Main Menu Container -->
     <div class="container menu-container" id="menuContainer">
@@ -209,6 +231,7 @@
         </table>
         <button onclick="returnToMenu()">Return to Menu</button>
     </div>
+    
 
     <!-- Load JavaScript files at the end of the body -->
     <script src="{% static 'js/common.js' %}" defer></script>

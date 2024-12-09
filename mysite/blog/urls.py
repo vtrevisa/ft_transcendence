@@ -1,5 +1,6 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
+from django.contrib import admin
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -16,4 +17,10 @@ urlpatterns = [
 	path('get_username_by_nickname/', views.get_username_by_nickname, name='get_username_by_nickname'),
 	path('update_status_counter/', views.update_status_counter, name='update_status_counter'),
 	path('record_game_history/', views.record_game_history, name='record_game_history'),
+	path('callback/', views.callback_view, name='callback'),
+    path('admin/', admin.site.urls),
+    path('oauth/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    path('login42/', views.login_view42, name='login42'),
+    path('logout42/', views.logout42, name='logout42'),
+    path('callback/', views.callback_view, name='callback'),
 ]
