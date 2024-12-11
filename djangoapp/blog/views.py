@@ -3,16 +3,11 @@ import logging
 from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from .models import UserProfile, Match
 import requests
 from django.shortcuts import render, redirect
-from django.conf import settings
-from django.contrib.auth import login
-from django.contrib.auth.models import User
-from django.contrib.auth import logout as auth_logout
 
 User = get_user_model()
 logger = logging.getLogger(__name__)

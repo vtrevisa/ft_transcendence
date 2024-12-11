@@ -16,7 +16,7 @@ services:
       - psql
   psql:
     container_name: psql
-    image: postgres:14.15-bullseye
+    image: postgres:16
     volumes:
       - ./data/postgres/data:/var/lib/postgresql/data/
     env_file:

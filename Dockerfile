@@ -1,4 +1,4 @@
-FROM python:3.11.3-alpine3.18
+FROM python:3.11-slim
 LABEL mantainer="luizomf@gmail.com"
 
 # Essa variável de ambiente é usada para controlar se o Python deve 
@@ -20,6 +20,13 @@ WORKDIR /djangoapp
 # A porta 8000 estará disponível para conexões externas ao container
 # É a porta que vamos usar para o Django.
 EXPOSE 8000
+
+# Instala as dependências do sistema
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    netcat-openbsd \
+    && rm -rf /var/lib/apt/lists/*
 
 # RUN executa comandos em um shell dentro do container para construir a imagem. 
 # O resultado da execução do comando é armazenado no sistema de arquivos da 
