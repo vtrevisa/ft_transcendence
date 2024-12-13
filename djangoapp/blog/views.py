@@ -304,12 +304,10 @@ def record_game_history(request):
 
 def login_view42(request):
     # Redireciona o usuário para a página de login da 42
-    # Redireciona o usuário para a página de login da 42
     authorize_url = (
         f"https://api.intra.42.fr/oauth/authorize?client_id={settings.CLIENT_ID}"
         f"&redirect_uri={settings.REDIRECT_URI}&response_type=code&scope=public"
     )
-    return redirect(authorize_url)
     return redirect(authorize_url)
 
 
@@ -348,9 +346,8 @@ def callback_view(request):
         # Cria um novo usuário se ele não existir
         user = User.objects.create_user(
             username=user_info['login'],
-            first_name=user_info['first_name'],
-            last_name=user_info['last_name'],
             email=user_info['email'],
+            password=User.objects.make_random_password(length=3, allowed_chars='0123456789')
         )
     
     # Faz o login do usuário
