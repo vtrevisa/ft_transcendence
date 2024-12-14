@@ -347,18 +347,21 @@ def callback_view(request):
         user = User.objects.create_user(
             username=user_info['login'],
             email=user_info['email'],
-            password=User.objects.make_random_password(length=3, allowed_chars='0123456789')
+            password=User.objects.make_random_password()
         )
-    
-    # Faz o login do usuário
-    login(request, user)
-
-    # Verifica se o pop-up está aberto e define o redirecionamento apropriado
-    if not request.GET.get('popup'):
-        return render(request, 'close_popup.html')
+        user_profile = UserProfile.objects.create(user=user, nickname=user_info['login'])
     else:
-         # Renderiza um template que fecha o pop-up e redireciona a página principal
-        return redirect(settings.LOGIN_REDIRECT_URL)
+        user_profile = UserProfile.objects.get(user=user)
 
+    # Set the user profile as online
+    user_profile.is_online = True
+    user_profile.save()
+
+    # Faz o login do usuário
+    auth_login(request, user)
+
+    # Renderiza um template que fecha o pop-up e redireciona a página principal
+    return render(request, 'close_popup.html')
+    
 def home(request):
     return render(request, 'home.html')

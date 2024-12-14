@@ -28,8 +28,8 @@ const nicknameToUsernameMap = {};
 
 async function startVsPlayerGame(tournamentMode = false) {
     window.isTournamentMode = tournamentMode;
-    const player1Nickname = document.getElementById('player1Nickname').value || "Player 1";
-    const player2Nickname = document.getElementById('player2Nickname').value || "Player 2";
+    player1Nickname = document.getElementById('player1Nickname').value || "Player 1";
+    player2Nickname = document.getElementById('player2Nickname').value || "Player 2";
 
     // Fetch username for Player 1 from the server
     const player1Username = await fetchUsernameByNickname(player1Nickname);
@@ -141,8 +141,6 @@ function detectCollision() {
 }
 
 function updateScore() {
-    const player1Nickname = window.player1Nickname || "Player 1";
-    const player2Nickname = window.player2Nickname || "Player 2";
     scoreDisplay.textContent = `${player1Nickname}: ${player1Score} | ${player2Nickname}: ${player2Score}`;
 }
 
@@ -208,8 +206,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function endGame() {
     // Retrieve player nicknames
-    const player1Nickname = document.getElementById('player1Nickname').value;
-    const player2Nickname = document.getElementById('player2Nickname').value;
+    const player1Nickname = document.getElementById('player1Nickname').value || "Player 1";
+    const player2Nickname = document.getElementById('player2Nickname').value || "Player 2";
 
     // Retrieve the correct username for Player 1 using the mapping object
     const player1Username = nicknameToUsernameMap[player1Nickname];
