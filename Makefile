@@ -1,26 +1,17 @@
-SHELL := /bin/bash
-SNAME=mysite
+.PHONY: up down restart rebuild logs
 
-all: update install python $(SNAME) run
-	
-update:
-	sudo apt-get update
+up:
+	docker-compose up -d
 
-install:
-	sudo apt install python3 python3-pip python3-venv
-	sudo apt install python3-django
+down:
+	docker-compose down
 
-migration:
-	python3 ./mysite/manage.py makemigrations
-	python3 ./mysite/manage.py migrate
+restart: down up
 
-python:
-	python3 -m venv tenv
-	. tenv/bin/activate
-	pip install django
+rebuild:
+	docker-compose down
+	docker-compose build
+	docker-compose up -d
 
-$(SNAME):
-	django-admin startproject $(SNAME)
-
-run:
-	python3 ./mysite/manage.py runserver
+logs:
+	docker-compose logs -f
