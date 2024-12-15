@@ -80,6 +80,9 @@ function selectMode(mode) {
         document.getElementById('nicknameContainer').style.display = 'block';
     } else if (mode === 'tournament') {
         document.getElementById('tournamentContainer').style.display = 'block';
+    } else if (mode === 'fourPlayers') {
+        document.getElementById('fourPlayersContainer').style.display = 'block';
+        // startFourPlayersGame(); // Iniciar lógica de 4 jogadores
     }
 }
 
@@ -95,6 +98,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     document.getElementById('tournamentButton').addEventListener('click', function() {
         selectMode('tournament');
+    });
+    document.getElementById('fourPlayersButton').addEventListener('click', function() {
+        selectMode('fourPlayers');
     });
 
     // Add event listener for sign-in form submission

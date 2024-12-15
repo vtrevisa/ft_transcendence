@@ -365,3 +365,6 @@ def callback_view(request):
     
 def home(request):
     return render(request, 'home.html')
+
+def four_players(request):
+    return render(request, 'four_players.html')  # Certifique-se de ter um template 'four_players.html'

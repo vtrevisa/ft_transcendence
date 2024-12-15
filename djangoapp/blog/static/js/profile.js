@@ -12,6 +12,7 @@ function displayProfile(profile) {
     const logoutButton = document.getElementById('logoutButton');
     const vsGameButton = document.getElementById('vsGameButton');
     const tournamentButton = document.getElementById('tournamentButton');
+    const fourPlayersButton = document.getElementById('fourPlayersButton');
     const editProfileButton = document.getElementById('editProfileButton');
     const friendListButton = document.getElementById('friendListButton');
     const historyButton = document.getElementById('historyButton');
@@ -26,6 +27,7 @@ function displayProfile(profile) {
     if (logoutButton) logoutButton.style.display = 'block';
     if (vsGameButton) vsGameButton.style.display = 'block';
     if (tournamentButton) tournamentButton.style.display = 'block';
+    if (fourPlayersButton) fourPlayersButton.style.display = 'block';
     if (editProfileButton) editProfileButton.style.display = 'block';
     if (friendListButton) friendListButton.style.display = 'block';
     if (historyButton) historyButton.style.display = 'block';

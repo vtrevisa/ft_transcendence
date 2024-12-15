@@ -21,4 +21,5 @@ urlpatterns = [
     path('oauth/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     path('login42/', views.login_view42, name='login42'),
     path('logout42/', views.logout42, name='logout42'),
+    path('four-players/', views.four_players, name='four_players_game'),
 ]

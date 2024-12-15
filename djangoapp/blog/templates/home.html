@@ -57,11 +57,23 @@
     </div>
 
     <!-- Game Mode Container -->
-    <div class="container game-mode-container" id="gameModeContainer" style="display: none;">
-        <button id="vsGameButton" onclick="selectMode('vsPlayer')">VS Game</button>
-        <button id="tournamentButton" onclick="selectMode('tournament')">Tournament</button>
+<div class="container game-mode-container" id="gameModeContainer" style="display: none;">
+    <button id="vsGameButton" onclick="selectMode('vsPlayer')">VS Game</button>
+    <button id="tournamentButton" onclick="selectMode('tournament')">Tournament</button>
+    <button id="fourPlayersButton" onclick="selectMode('fourPlayers')">4 Players</button> <!-- Novo botão -->
+    <button onclick="returnToMenu()">Return to Menu</button>
+</div>
+
+<!-- Game Container -->
+<div class="container gameContainer" id="gameContainer" style="display: none;">
+    <h1>Pongon-line</h1>
+    <div id="scoreDisplay"></div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas> <!-- Aumente o tamanho para acomodar 4 jogadores -->
+    <div class="button-container">
+        <button onclick="resetGame()">Reset Game</button>
         <button onclick="returnToMenu()">Return to Menu</button>
     </div>
+</div>
 
     <!-- Login Form Container -->
     <div class="container" id="loginContainer" style="display: none;">
@@ -139,17 +151,6 @@
             <button type="submit">Add Friend</button>
         </form>
         <button onclick="showFriendList()">Return to Friend List</button>
-    </div>
-
-    <!-- Game Container -->
-    <div class="container gameContainer" id="gameContainer" style="display: none;">
-        <h1>Pongon-line</h1>
-        <div id="scoreDisplay"></div>
-        <canvas id="gameCanvas" width="600" height="400"></canvas>
-        <div class="button-container">
-            <button onclick="resetGame()">Reset Game</button>
-            <button onclick="returnToMenu()">Return to Menu</button>
-        </div>
     </div>
 
     <!-- Nickname Container -->
@@ -241,5 +242,6 @@
     <script src="{% static 'js/login.js' %}" defer></script>
     <script src="{% static 'js/profile.js' %}" defer></script>
     <script src="{% static 'js/menu.js' %}" defer></script>
+    <script src="{% static 'js/fourPlayers.js' %}" defer></script>
 </body>
 </html>
