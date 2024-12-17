@@ -12,13 +12,7 @@
     <title>Home</title>
     <script type="text/javascript">
         function openLoginPopup() {
-            var width = 600;
-            var height = 700;
-            var left = (screen.width - width) / 2;
-            var top = (screen.height - height) / 2;
-            var url = "{% url 'login42' %}";
-            var params = 'menubar=no,toolbar=no,status=no,width=' + width + ',height=' + height + ',top=' + top + ',left=' + left;
-            window.open(url, 'Login with 42', params);
+            window.location.href = "{% url 'login42' %}";
         }
     </script>
 </head>

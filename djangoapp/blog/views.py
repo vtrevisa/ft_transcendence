@@ -344,12 +344,8 @@ def callback_view(request):
         user = User.objects.get(username=user_info['login'])
     except User.DoesNotExist:
         # Cria um novo usuário se ele não existir
-        user = User.objects.create_user(
-            username=user_info['login'],
-            email=user_info['email'],
-            password=User.objects.make_random_password()
-        )
-        user_profile = UserProfile.objects.create(user=user, nickname=user_info['login'])
+        password = "randompasswd"
+        user = User.objects.create_user(username=user_info['login'], password=password, email=user_info['email'])
     else:
         user_profile = UserProfile.objects.get(user=user)
 
@@ -361,7 +357,7 @@ def callback_view(request):
     auth_login(request, user)
 
     # Renderiza um template que fecha o pop-up e redireciona a página principal
-    return render(request, 'close_popup.html')
+    return redirect('/')
     
 def home(request):
     return render(request, 'home.html')

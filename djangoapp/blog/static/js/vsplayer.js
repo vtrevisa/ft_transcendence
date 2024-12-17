@@ -8,10 +8,12 @@ let player2Score = 0;
 let player1Nickname = "Player 1";
 let player2Nickname = "Player 2";
 let gameStarted = false;
-let ball, player1, player2, gameInterval;
+let ball = [];
+let player1, player2, gameInterval;
 window.isTournamentMode = false; // Define isTournamentMode globally
 
-const paddleSpeed = 12;
+const defaultPaddleSpeed = 12;
+let paddleSpeed = defaultPaddleSpeed;
 let player1Y = canvas.height / 2 - 30;
 let player2Y = canvas.height / 2 - 30;
 const maxScore = 5;
@@ -95,7 +97,15 @@ function updateGame() {
 }
 
 function resetBall() {
-    ball = { x: canvas.width / 2, y: canvas.height / 2, vx: 10, vy: 10, radius: 8 };
+    ball = { x: canvas.width / 2, y: canvas.height / 2, radius: 8 };
+
+    // Set random direction for ball velocity
+    const speed = 10; // You can adjust this value as needed
+    const angle = Math.random() * Math.PI * 2; // Random angle in radians
+
+    ball.vx = speed * Math.cos(angle);
+    ball.vy = speed * Math.sin(angle);
+
     player1 = { x: 10, y: player1Y, width: 10, height: 60 };
     player2 = { x: canvas.width - 20, y: player2Y, width: 10, height: 60 };
 }
@@ -157,6 +167,11 @@ function draw() {
     context.fillStyle = '#fff';
     context.fillRect(player1.x, player1Y, player1.width, player1.height);
     context.fillRect(player2.x, player2Y, player2.width, player2.height);
+
+    // Draw scores
+    context.font = '24px Arial';
+    context.fillText(`${player1Nickname}: ${player1Score}`, 50, 50);
+    context.fillText(`${player2Nickname}: ${player2Score}`, canvas.width - 150, 50);
 }
 
 document.addEventListener('keydown', (event) => {
