@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from .models import UserProfile, Match
 from django.shortcuts import render, redirect
 from django.conf import settings
-from django.contrib.auth import login
+from django.utils import timezone
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -316,48 +316,53 @@ def logout42(request):
     return redirect('/')
 
 def callback_view(request):
-    # Obtém o código de autorização da URL de redirecionamento
-    code = request.GET.get('code')
-    token_url = "https://api.intra.42.fr/oauth/token"
-    token_data = {
-        'grant_type': 'authorization_code',
-        'client_id': settings.CLIENT_ID,
-        'client_secret': settings.CLIENT_SECRET,
-        'code': code,
-        'redirect_uri': settings.REDIRECT_URI,
-    }
-    
-    # Solicita o token de acesso usando o código de autorização
-    token_response = requests.post(token_url, data=token_data)
-    token_json = token_response.json()
-    access_token = token_json.get('access_token')
+    if request.method == 'GET':
+        code = request.GET.get('code')
+        token_url = "https://api.intra.42.fr/oauth/token"
+        token_data = {
+            'grant_type': 'authorization_code',
+            'client_id': settings.CLIENT_ID,
+            'client_secret': settings.CLIENT_SECRET,
+            'code': code,
+            'redirect_uri': settings.REDIRECT_URI,
+        }
+        
+        token_response = requests.post(token_url, data=token_data)
+        token_json = token_response.json()
+        access_token = token_json.get('access_token')
 
-    # Usa o token de acesso para obter informações do usuário
-    user_info_url = "https://api.intra.42.fr/v2/me"
-    user_info_response = requests.get(
-        user_info_url, headers={'Authorization': f'Bearer {access_token}'}
-    )
-    user_info = user_info_response.json()
+        user_info_url = "https://api.intra.42.fr/v2/me"
+        user_info_response = requests.get(
+            user_info_url, headers={'Authorization': f'Bearer {access_token}'}
+        )
+        user_info = user_info_response.json()
 
-    # Verifica se o usuário já existe no banco de dados
-    try:
-        user = User.objects.get(username=user_info['login'])
-    except User.DoesNotExist:
-        # Cria um novo usuário se ele não existir
-        password = "randompasswd"
-        user = User.objects.create_user(username=user_info['login'], password=password, email=user_info['email'])
-    else:
-        user_profile = UserProfile.objects.get(user=user)
+        try:
+            user = User.objects.get(username=user_info['login'])
+            if user.last_login is None:
+                user.last_login = timezone.now()  # Set the last_login field if not set
+                user.save()
+        except User.DoesNotExist:
+            password = "randompasswd"
+            user = User(username=user_info['login'], email=user_info['email'])
+            user.set_password(password)
+            user.last_login = timezone.now()  # Set the last_login field
+            user.save()
+            user_profile = UserProfile.objects.create(user=user, nickname=user_info['login'])
+        
+        # Ensure UserProfile is created if it does not exist
+        user_profile, created = UserProfile.objects.get_or_create(user=user)
+        if created:
+            user_profile.nickname = user_info['login']
+        user_profile.is_online = True
+        user_profile.save()
 
-    # Set the user profile as online
-    user_profile.is_online = True
-    user_profile.save()
 
-    # Faz o login do usuário
-    auth_login(request, user)
+        auth_login(request, user)
 
-    # Renderiza um template que fecha o pop-up e redireciona a página principal
-    return redirect('/')
-    
+        return redirect('/')
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=400)
+
 def home(request):
     return render(request, 'home.html')
