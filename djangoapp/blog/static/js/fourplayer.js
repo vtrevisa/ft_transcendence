@@ -31,6 +31,7 @@ function startFourPlayerGame() {
     buttonContainer4.style.display = 'block';
 
     resetGame4();
+    updateScore4(); // Garante que o placar é mostrado no início
     draw4();
 
     gameStarted4 = false;
@@ -82,26 +83,26 @@ function updateGame4() {
 
     // Check for scoring conditions
     if (ball4.x <= 0) {
-        // Left wall - Player 1 loses a point
-        playerScores4[0]++;
-        updateScore4();
-        resetBall4();
-    }
-    if (ball4.x >= canvas4.width) {
-        // Right wall - Player 2 loses a point
+        // Left wall - Player 2 ganha 1 ponto
         playerScores4[1]++;
         updateScore4();
         resetBall4();
     }
+    if (ball4.x >= canvas4.width) {
+        // Right wall - Player 1 ganha 1 ponto
+        playerScores4[0]++;
+        updateScore4();
+        resetBall4();
+    }
     if (ball4.y <= 0) {
-        // Top wall - Player 3 loses a point
-        playerScores4[2]++;
+        // Top wall - Player 4 ganha 1 ponto
+        playerScores4[3]++;
         updateScore4();
         resetBall4();
     }
     if (ball4.y >= canvas4.height) {
-        // Bottom wall - Player 4 loses a point
-        playerScores4[3]++;
+        // Bottom wall - Player 3 ganha 1 ponto
+        playerScores4[2]++;
         updateScore4();
         resetBall4();
     }
@@ -158,7 +159,14 @@ function detectCollision4() {
 
 // Function to update the score display
 function updateScore4() {
-    scoreDisplay4.textContent = `${playerNicknames4[0]}: ${playerScores4[0]} | ${playerNicknames4[1]}: ${playerScores4[1]} | ${playerNicknames4[2]}: ${playerScores4[2]} | ${playerNicknames4[3]}: ${playerScores4[3]}`;
+    // Atualiza o conteúdo do placar no elemento de scoreDisplay4
+    scoreDisplay4.textContent = `
+        ${playerNicknames4[0]}: ${playerScores4[0]} | 
+        ${playerNicknames4[1]}: ${playerScores4[1]} | 
+        ${playerNicknames4[2]}: ${playerScores4[2]} | 
+        ${playerNicknames4[3]}: ${playerScores4[3]}
+    `;
+    scoreDisplay4.style.display = 'block'; // Garante que o placar está visível
 }
 
 // Function to draw the game elements
@@ -181,6 +189,9 @@ function draw4() {
     context4.fillRect(paddles4[2].x, paddles4[2].y, paddles4[2].width, paddles4[2].height);
     // Bottom paddle
     context4.fillRect(paddles4[3].x, paddles4[3].y, paddles4[3].width, paddles4[3].height);
+
+    // Exibe o placar no topo do canvas
+    updateScore4();
 }
 
 // Event listeners for paddle controls
