@@ -194,6 +194,21 @@
         </div>
     </div>
 
+    <!-- FourPlayers Container -->
+    <div class="container" id="fourPlayersContainer" style="display: none;">
+        <h2>Enter Player Nicknames</h2>
+        <input type="text" id="player1Nickname" placeholder="Player 1 Nickname">
+        <input type="hidden" id="player1Username" value=""> <!-- Hidden input for Player 1 Username -->
+        <input type="text" id="player2Nickname" placeholder="Player 2 Nickname">
+        <input type="hidden" id="player2Username" value=""> <!-- Hidden input for Player 2 Username -->
+        <input type="text" id="player3Nickname" placeholder="Player 3 Nickname">
+        <input type="hidden" id="player3Username" value="">
+        <input type="text" id="player4Nickname" placeholder="Player 4 Nickname">
+        <input type="hidden" id="player4Username" value="">
+        <button onclick="startFourPlayersGame()">Start Game</button>
+        <button onclick="returnToMenu()">Return to Menu</button>
+    </div>
+
     <!-- Match History Container -->
     <div class="container" id="matchHistoryContainer" style="display: none;">
         <h2>Match History</h2>
@@ -242,6 +257,6 @@
     <script src="{% static 'js/login.js' %}" defer></script>
     <script src="{% static 'js/profile.js' %}" defer></script>
     <script src="{% static 'js/menu.js' %}" defer></script>
-    <script src="{% static 'js/fourPlayers.js' %}" defer></script>
+    <script src="{% static 'js/four_flayers.js' %}" defer></script>
 </body>
 </html>

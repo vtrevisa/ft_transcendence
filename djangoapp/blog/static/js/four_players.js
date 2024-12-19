@@ -1,9 +1,15 @@
 // Variables for 4 players
-let player3, player4;
+let player1, player2, player3, player4;
+let player1Score = 0;
+let player2Score = 0;
 let player3Score = 0;
 let player4Score = 0;
+let player1Y = canvas.height / 2 - 30;
+let player2Y = canvas.height / 2 - 30;
 let player3Y = canvas.height / 2 - 30;
 let player4Y = canvas.height / 2 - 30;
+let player1Nickname = "Player 1";
+let player2Nickname = "Player 2";
 let player3Nickname = "Player 3";
 let player4Nickname = "Player 4";
 
