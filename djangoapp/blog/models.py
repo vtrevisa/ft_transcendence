@@ -6,8 +6,8 @@ from django.utils import timezone
 
 class Match(models.Model):
     player1 = models.ForeignKey(User, related_name='matches_as_player1', on_delete=models.CASCADE)
-    player2 = models.ForeignKey(User, related_name='matches_as_player2', on_delete=models.CASCADE, null=True, blank=True)
-    winner = models.ForeignKey(User, related_name='matches_won', on_delete=models.CASCADE)
+    player2 = models.CharField(max_length=100, null=True, blank=True)
+    winner = models.CharField(max_length=100, null=True, blank=True)
     date = models.DateTimeField(default=timezone.now)
     details = models.TextField(blank=True)
 

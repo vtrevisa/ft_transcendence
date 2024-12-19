@@ -54,6 +54,7 @@
     <div class="container game-mode-container" id="gameModeContainer" style="display: none;">
         <button id="vsGameButton" onclick="selectMode('vsPlayer')">VS Game</button>
         <button id="tournamentButton" onclick="selectMode('tournament')">Tournament</button>
+        <button onclick="showSettings()">Settings</button> <!-- Button to show settings -->
         <button onclick="returnToMenu()">Return to Menu</button>
     </div>
 
@@ -225,7 +226,36 @@
         </table>
         <button onclick="returnToMenu()">Return to Menu</button>
     </div>
-    
+
+     <!-- Settings Container -->
+     <div class="container" id="settingsContainer" style="display: none;">
+        <h2>Settings</h2>
+        <form id="settingsForm">
+            <div>
+                <label for="enableObstacles">Enable Obstacles:</label>
+                <input type="checkbox" id="enableObstacles">
+            </div>
+            <div>
+                <label for="enableMultipleBalls">Enable Multiple Balls:</label>
+                <input type="checkbox" id="enableMultipleBalls">
+            </div>
+            <div>
+                <label for="numberOfBalls">Number of Balls:</label>
+                <input type="number" id="numberOfBalls" min="1" max="10" value="1">
+            </div>
+            <div>
+                <label for="ballSpeed">Ball Speed:</label>
+                <input type="number" id="ballSpeed" min="1" max="20" value="10">
+            </div>
+            <div>
+                <label for="paddleSpeed">Paddle Speed:</label>
+                <input type="number" id="paddleSpeed" min="1" max="20" value="12">
+            </div>
+            <button type="button" id="confirmButton">Confirm</button>
+            <button type="button" id="resetButton">Reset to Default</button>
+        </form>
+        <button onclick="returnToMenu()">Return to Menu</button>
+    </div>
 
     <!-- Load JavaScript files at the end of the body -->
     <script src="{% static 'js/common.js' %}" defer></script>
@@ -235,5 +265,6 @@
     <script src="{% static 'js/login.js' %}" defer></script>
     <script src="{% static 'js/profile.js' %}" defer></script>
     <script src="{% static 'js/menu.js' %}" defer></script>
+    <script src="{% static 'js/settings.js' %}" defer></script>
 </body>
 </html>

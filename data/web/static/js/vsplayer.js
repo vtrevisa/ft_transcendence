@@ -8,12 +8,11 @@ let player2Score = 0;
 let player1Nickname = "Player 1";
 let player2Nickname = "Player 2";
 let gameStarted = false;
-let ball = [];
-let player1, player2, gameInterval;
+let balls = [];
+let player1, player2;
 window.isTournamentMode = false; // Define isTournamentMode globally
 
 const defaultPaddleSpeed = 12;
-let paddleSpeed = defaultPaddleSpeed;
 let player1Y = canvas.height / 2 - 30;
 let player2Y = canvas.height / 2 - 30;
 const maxScore = 5;
@@ -27,6 +26,15 @@ const tButtonContainer = document.querySelector('.tButton-container');
 
 // Global mapping object
 const nicknameToUsernameMap = {};
+
+// Initialize game settings
+let gameSettings = {
+    enableObstacles: false,
+    enableMultipleBalls: false,
+    numberOfBalls: 1,
+    ballSpeed: 10,
+    paddleSpeed: 12
+};
 
 async function startVsPlayerGame(tournamentMode = false) {
     window.isTournamentMode = tournamentMode;
@@ -66,27 +74,36 @@ function resetGame() {
     player2Y = canvas.height / 2 - player2.height / 2;
     draw();
     updateScore();
-    if (gameInterval) {
-        clearInterval(gameInterval);
-        gameInterval = null; // Clear the interval reference
-    }
     gameStarted = false; // Ensure gameStarted is set to false
 }
 
+// Function to start the game with the current settings
 function startGame() {
-    resetGame();
-    draw();
-    if (gameInterval) clearInterval(gameInterval);
-    gameInterval = setInterval(() => updateGame(), 1000 / 60); // 60 fps
-    gameStarted = true; // Set gameStarted to true when starting the game
+    if (window.gameSettings) {
+        gameSettings = window.gameSettings;
+    }
+
+    resetBall(); // Initialize balls with the current settings
+    player1.speed = gameSettings.paddleSpeed;
+    player2.speed = gameSettings.paddleSpeed;
+
+    gameStarted = true;
+    requestAnimationFrame(gameLoop);
 }
 
-// Update the updateGame function to call endGame when the game ends
+function gameLoop() {
+    if (gameStarted) {
+        updateGame();
+        requestAnimationFrame(gameLoop);
+    }
+}
+
 function updateGame() {
     moveBall();
     detectCollision();
     draw();
     if (player1Score >= maxScore || player2Score >= maxScore) {
+        gameStarted = false;
         if (window.isTournamentMode)
             endTournamentGame();
         else
@@ -97,57 +114,82 @@ function updateGame() {
 }
 
 function resetBall() {
-    ball = { x: canvas.width / 2, y: canvas.height / 2, radius: 8 };
+    balls = []; // Array to hold multiple balls
 
-    // Set random direction for ball velocity
-    const speed = 10; // You can adjust this value as needed
-    const angle = Math.random() * Math.PI * 2; // Random angle in radians
+    for (let i = 0; i < (gameSettings.enableMultipleBalls ? gameSettings.numberOfBalls : 1); i++) {
+        const ball = { 
+            x: canvas.width / 2, 
+            y: canvas.height / 2, 
+            radius: 8 
+        };
 
-    ball.vx = speed * Math.cos(angle);
-    ball.vy = speed * Math.sin(angle);
+        // Set random direction for ball velocity
+        const speed = gameSettings.ballSpeed; // Use the ball speed from settings
+        const angle = Math.random() * Math.PI * 2; // Random angle in radians
 
-    player1 = { x: 10, y: player1Y, width: 10, height: 60 };
-    player2 = { x: canvas.width - 20, y: player2Y, width: 10, height: 60 };
+        ball.vx = speed * Math.cos(angle);
+        ball.vy = speed * Math.sin(angle);
+
+        balls.push(ball);
+    }
+
+    player1 = { x: 10, y: player1Y, width: 10, height: 60, speed: gameSettings.paddleSpeed };
+    player2 = { x: canvas.width - 20, y: player2Y, width: 10, height: 60, speed: gameSettings.paddleSpeed };
 }
 
 function moveBall() {
-    ball.x += ball.vx;
-    ball.y += ball.vy;
+    balls.forEach(ball => {
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+
+        // Bounce off top and bottom walls
+        if (ball.y <= ball.radius || ball.y >= canvas.height - ball.radius) {
+            ball.vy *= -1;
+        }
+
+        // Left and right scoring
+        if (ball.x <= 0) {
+            player2Score++;
+            updateScore();
+            resetBall();
+        }
+        if (ball.x >= canvas.width) {
+            player1Score++;
+            updateScore();
+            resetBall();
+        }
+    });
 
     // Update paddle positions
     player1.y = player1Y;
     player2.y = player2Y;
-
-    // Bounce off top and bottom walls
-    if (ball.y <= ball.radius || ball.y >= canvas.height - ball.radius) {
-        ball.vy *= -1;
-    }
-
-    // Left and right scoring
-    if (ball.x <= 0) {
-        player2Score++;
-        updateScore();
-        resetBall();
-    }
-    if (ball.x >= canvas.width) {
-        player1Score++;
-        updateScore();
-        resetBall();
-    }
 }
 
 function detectCollision() {
-    // Player 1 paddle collision
-    if (ball.x - ball.radius < player1.x + player1.width &&
-        ball.y > player1.y && ball.y < player1.y + player1.height) {
-        ball.vx = Math.abs(ball.vx); // Ensure ball moves right
-    }
+    balls.forEach(ball => {
+        // Check collision with player 1 paddle
+        if (ball.x - ball.radius < player1.x + player1.width &&
+            ball.x + ball.radius > player1.x &&
+            ball.y - ball.radius < player1.y + player1.height &&
+            ball.y + ball.radius > player1.y) {
+            ball.vx *= -1; // Reverse ball direction
+            ball.x = player1.x + player1.width + ball.radius; // Adjust ball position
+        }
 
-    // Player 2 paddle collision
-    if (ball.x + ball.radius > player2.x &&
-        ball.y > player2.y && ball.y < player2.y + player2.height) {
-        ball.vx = -Math.abs(ball.vx); // Ensure ball moves left
-    }
+        // Check collision with player 2 paddle
+        if (ball.x - ball.radius < player2.x + player2.width &&
+            ball.x + ball.radius > player2.x &&
+            ball.y - ball.radius < player2.y + player2.height &&
+            ball.y + ball.radius > player2.y) {
+            ball.vx *= -1; // Reverse ball direction
+            ball.x = player2.x - ball.radius; // Adjust ball position
+        }
+
+        // Check collision with obstacles if enabled
+        if (gameSettings.enableObstacles) {
+            // Add obstacle collision logic here
+        }
+    });
 }
 
 function updateScore() {
@@ -155,46 +197,45 @@ function updateScore() {
 }
 
 function draw() {
+    // Clear the canvas
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw ball
-    context.beginPath();
-    context.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    context.fillStyle = '#fff';
-    context.fill();
+    // Draw each ball
+    balls.forEach(ball => {
+        context.beginPath();
+        context.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+        context.fillStyle = "#0095DD";
+        context.fill();
+        context.closePath();
+    });
 
     // Draw paddles
-    context.fillStyle = '#fff';
-    context.fillRect(player1.x, player1Y, player1.width, player1.height);
-    context.fillRect(player2.x, player2Y, player2.width, player2.height);
+    context.fillStyle = "#0095DD";
+    context.fillRect(player1.x, player1.y, player1.width, player1.height);
+    context.fillRect(player2.x, player2.y, player2.width, player2.height);
 
-    // Draw scores
-    context.font = '24px Arial';
-    context.fillText(`${player1Nickname}: ${player1Score}`, 50, 50);
-    context.fillText(`${player2Nickname}: ${player2Score}`, canvas.width - 150, 50);
+    // Draw net
+    context.fillStyle = "#0095DD";
+    context.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);
 }
 
 document.addEventListener('keydown', (event) => {
+    if (event.key === ' ') {
+        startGame();
+    }
     if (gameStarted) {
         if (event.key === 'w' && player1Y > 0) {
-            player1Y -= paddleSpeed; // Move player 1 up
+            player1Y -= gameSettings.paddleSpeed; // Move player 1 up
         }
         if (event.key === 's' && player1Y < canvas.height - 60) { // Use the actual paddle height
-            player1Y += paddleSpeed; // Move player 1 down
+            player1Y += gameSettings.paddleSpeed; // Move player 1 down
         }
         if (event.key === 'ArrowUp' && player2Y > 0) {
-            player2Y -= paddleSpeed; // Move player 2 up
+            player2Y -= gameSettings.paddleSpeed; // Move player 2 up
         }
         if (event.key === 'ArrowDown' && player2Y < canvas.height - 60) { // Use the actual paddle height
-            player2Y += paddleSpeed; // Move player 2 down
+            player2Y += gameSettings.paddleSpeed; // Move player 2 down
         }
-    }
-});
-
-document.addEventListener('keydown', (event) => {
-    if (event.code === 'Space' && !gameStarted) {
-        gameStarted = true; // Set game as started
-        startGame(); // Start the game loop with tournament mode
     }
 });
 
@@ -220,27 +261,24 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function endGame() {
-    // Retrieve player nicknames
-    const player1Nickname = document.getElementById('player1Nickname').value || "Player 1";
-    const player2Nickname = document.getElementById('player2Nickname').value || "Player 2";
-
-    // Retrieve the correct username for Player 1 using the mapping object
-    const player1Username = nicknameToUsernameMap[player1Nickname];
-
+    gameStarted = false;
     // Determine the outcome
     const player1_won = player1Score >= maxScore;
     const outcome = player1_won ? 'won' : 'lost';
-    const winner = player1_won ? player1Username : player2Nickname;
+    const winner = player1_won ? player1Nickname : player2Nickname;
 
     // Retrieve match information
     const matchTime = new Date().toISOString(); // Format the date correctly
     const matchScore = `${player1Score} - ${player2Score}`;
 
     // Print information on the console
-    console.log(`Player 1 (Username: ${player1Username}, Nickname: ${player1Nickname}) ${outcome} the match.`);
+    console.log(`Player 1 (Nickname: ${player1Nickname}) ${outcome} the match.`);
     console.log(`Match Score: ${matchScore}`);
     console.log(`Match Time: ${matchTime}`);
     console.log(`Player 2 (Nickname: ${player2Nickname})`);
+
+    // Retrieve usernames from nicknames
+    const player1Username = nicknameToUsernameMap[player1Nickname];
 
     // Update status counter
     updateStatusCounter(player1Username, outcome);
@@ -250,8 +288,6 @@ function endGame() {
 
     // Handle the end of the game
     scoreDisplay.textContent = `${player1_won ? player1Nickname : player2Nickname} wins! Final Score: ${player1Nickname} ${player1Score} - ${player2Nickname} ${player2Score}`;
-    clearInterval(gameInterval);
-    gameInterval = null; // Clear the interval reference
 
     if (window.isTournamentMode) {
         endTournamentGame();

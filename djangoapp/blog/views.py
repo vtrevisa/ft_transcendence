@@ -207,16 +207,20 @@ def status_view(request):
 
 @login_required
 def match_history_view(request):
-    user_profile = UserProfile.objects.get(user=request.user)
-    matches = Match.objects.filter(player1=user_profile.user).order_by('-date')
-    match_list = [{
-        'player1': match.player1.username,
-        'player2': match.player2.username if match.player2 else 'N/A',
-        'winner': match.winner.username,
-        'date': match.date.strftime('%Y-%m-%d %H:%M:%S'),
-        'details': match.details
-    } for match in matches]
-    return JsonResponse({'matches': match_list})
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        matches = Match.objects.filter(player1=user_profile.user).order_by('-date')
+        match_list = [{
+            'player1': match.player1.username,
+            'player2': match.player2 if match.player2 else 'N/A',
+            'winner': match.winner,
+            'date': match.date.strftime('%Y-%m-%d %H:%M:%S'),
+            'details': match.details
+        } for match in matches]
+        return JsonResponse({'matches': match_list})
+    except Exception as e:
+        logger.error(f"Error fetching match history: {str(e)}")
+        return JsonResponse({'message': str(e)}, status=500)
 
 def get_username_by_nickname(request):
     nickname = request.GET.get('nickname')
@@ -258,49 +262,44 @@ def update_status_counter(request):
 def record_game_history(request):
     if request.method == 'POST':
         try:
+            print(f"Request method: {request.method}")
+            print(f"Request body: {request.body}")
+
             data = json.loads(request.body)
+            print(f"Received data: {data}")
+
             player1_username = data.get('player1Username')
             player2_nickname = data.get('player2Nickname', 'N/A')
             winner = data.get('winner')
             match_time = data.get('matchTime')
             match_score = data.get('matchScore')
 
-            try:
-                player1 = User.objects.get(username=player1_username)
-            except User.DoesNotExist:
-                logger.error(f"User with username {player1_username} not found")
-                return JsonResponse({'message': f'User with username {player1_username} not found'}, status=404)
+            player1 = User.objects.get(username=player1_username)
 
-            # Handle Player 2 as a non-registered user
-            player2 = None
-            if player2_nickname != 'N/A':
-                try:
-                    player2_profile = UserProfile.objects.get(nickname=player2_nickname)
-                    player2 = player2_profile.user
-                except UserProfile.DoesNotExist:
-                    logger.warning(f"User profile with nickname {player2_nickname} not found, treating as non-registered user")
+            winner_user = player1 if winner == player1_username else player2_nickname
 
-            # Determine the winner user object
-            winner_user = player1 if winner == player1_username else player2
+            if winner_user is None:
+                print("Winner user is None, cannot proceed with recording game history")
+                return JsonResponse({'message': 'Winner user is None'}, status=400)
 
             Match.objects.create(
                 player1=player1,
-                player2=player2,
+                player2=player2_nickname,
                 winner=winner_user,
                 date=match_time,
                 details=match_score
             )
 
             return JsonResponse({'message': 'Game history recorded successfully'})
-        except json.JSONDecodeError:
-            logger.error("Invalid JSON in request body")
-            return JsonResponse({'message': 'Invalid JSON'}, status=400)
+        except User.DoesNotExist:
+            print("User not found")
+            return JsonResponse({'message': 'User not found'}, status=404)
         except Exception as e:
-            logger.error(f"Unexpected error: {str(e)}")
-            return JsonResponse({'message': f'Unexpected error: {str(e)}'}, status=500)
-
-    logger.error("Invalid request method")
-    return JsonResponse({'message': 'Invalid request method'}, status=400)
+            print(f"Exception: {str(e)}")
+            return JsonResponse({'message': str(e)}, status=400)
+    else:
+        print(f"Invalid request method: {request.method}")
+        return JsonResponse({'message': 'Invalid request method'}, status=400)
 
 def login_view42(request):
     # Redireciona o usuário para a página de login da 42
