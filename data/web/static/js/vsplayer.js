@@ -83,6 +83,13 @@ function startGame() {
         gameSettings = window.gameSettings;
     }
 
+    console.log('Game Settings:');
+    console.log('Enable Obstacles:', gameSettings.enableObstacles);
+    console.log('Enable Multiple Balls:', gameSettings.enableMultipleBalls);
+    console.log('Number of Balls:', gameSettings.numberOfBalls);
+    console.log('Ball Speed:', gameSettings.ballSpeed);
+    console.log('Paddle Speed:', gameSettings.paddleSpeed);
+
     resetBall(); // Initialize balls with the current settings
     player1.speed = gameSettings.paddleSpeed;
     player2.speed = gameSettings.paddleSpeed;

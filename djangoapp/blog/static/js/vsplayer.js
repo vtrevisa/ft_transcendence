@@ -194,7 +194,23 @@ function detectCollision() {
 
         // Check collision with obstacles if enabled
         if (gameSettings.enableObstacles) {
-            // Add obstacle collision logic here
+            const obstacleWidth = 20;
+            const obstacleHeight = 60;
+            const obstacleX = canvas.width / 2 - obstacleWidth / 2;
+            const topObstacleY = canvas.height / 4 - obstacleHeight / 2;
+            const bottomObstacleY = (3 * canvas.height) / 4 - obstacleHeight / 2;
+
+            // Top obstacle collision
+            if (ball.x + ball.radius > obstacleX && ball.x - ball.radius < obstacleX + obstacleWidth &&
+                ball.y + ball.radius > topObstacleY && ball.y - ball.radius < topObstacleY + obstacleHeight) {
+                ball.vx *= -1; // Reverse ball direction
+            }
+
+            // Bottom obstacle collision
+            if (ball.x + ball.radius > obstacleX && ball.x - ball.radius < obstacleX + obstacleWidth &&
+                ball.y + ball.radius > bottomObstacleY && ball.y - ball.radius < bottomObstacleY + obstacleHeight) {
+                ball.vx *= -1; // Reverse ball direction
+            }
         }
     });
 }
@@ -224,10 +240,23 @@ function draw() {
     // Draw net
     context.fillStyle = "#0095DD";
     context.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);
+
+    // Draw obstacles if enabled
+    if (gameSettings.enableObstacles) {
+        const obstacleWidth = 20;
+        const obstacleHeight = 60;
+        const obstacleX = canvas.width / 2 - obstacleWidth / 2;
+        const topObstacleY = canvas.height / 4 - obstacleHeight / 2;
+        const bottomObstacleY = (3 * canvas.height) / 4 - obstacleHeight / 2;
+
+        context.fillStyle = "#FF0000"; // Red color for obstacles
+        context.fillRect(obstacleX, topObstacleY, obstacleWidth, obstacleHeight);
+        context.fillRect(obstacleX, bottomObstacleY, obstacleWidth, obstacleHeight);
+    }
 }
 
 document.addEventListener('keydown', (event) => {
-    if (event.key === ' ') {
+    if (event.key === ' ' && !gameStarted) {
         startGame();
     }
     if (gameStarted) {
